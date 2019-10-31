@@ -45,7 +45,6 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
        </settings>''', fileName: '.m2/settings.xml')])
     }
     dir('workspace') {
-      deleteDir()
       git 'https://github.com/reinhapa/openjdk-jmc-overrides.git'
     }
     withEnv(["JAVA_HOME=${tool 'JDK8 u172'}", "PATH=$PATH:${tool 'apache-maven-3.5.3'}/bin"]) {
@@ -68,13 +67,13 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
           sh 'mvn p2:site'
           sh 'mvn jetty:run &'
         }
+        // apply overrides
         sh 'cp workspace/overrides/latest . -rf'
         sh 'mvn package'
       }
       wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, displayNameOffset: 0, installationName: 'default', screen: '']) {
         stage('Unit Tests') {
-          echo 'currently disabled'
-//          sh 'mvn verify'
+          sh 'mvn verify'
         }
         stage('UI Tests') {
           echo 'currently disabled'
@@ -83,11 +82,6 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
       }
       stage('Deploy update sites') {
         withCredentials([usernamePassword(credentialsId: 'missioncontrol-jenkins-bot', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-//          sh 'unzip application/org.openjdk.jmc.updatesite.ide/target/*.zip -d workspace/repository'
-//          dir('workspace/repository') {
-//            sh 'curl -X DELETE -u "${USERNAME}:${PASSWORD}" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide'
-//            sh 'find . -type f -exec curl -o /dev/null -s -u "${USERNAME}:${PASSWORD}" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/\'{}\' \\;'
-//          }
           dir('application/org.openjdk.jmc.updatesite.ide/target/repository') {
             sh 'curl -X DELETE -u "${USERNAME}:${PASSWORD}" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide'
             sh 'find . -type f -exec curl -o /dev/null -s -u "${USERNAME}:${PASSWORD}" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/\'{}\' \\;'
