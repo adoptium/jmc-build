@@ -49,7 +49,8 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
         stage('Build & test core libraries') {
           // Run the maven build
           sh 'mvn clean'
-          sh 'mvn install'
+//          sh 'mvn install'
+          sh 'mvn install -DskipTests'
         }
         stage('Deploy core libraries') {
           withCredentials([usernamePassword(credentialsId: 'missioncontrol-jenkins-bot', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
@@ -70,7 +71,8 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
       }
       wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, displayNameOffset: 0, installationName: 'default', screen: '']) {
         stage('Unit Tests') {
-          sh 'mvn verify'
+          echo 'currently disabled'
+//          sh 'mvn verify'
         }
         stage('UI Tests') {
           echo 'currently disabled'
@@ -79,13 +81,17 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
       }
       stage('Deploy update sites') {
         withCredentials([usernamePassword(credentialsId: 'missioncontrol-jenkins-bot', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-          dir('application/org.openjdk.jmc.updatesite.ide/target/repository') {
+          dir('workspace') {
+            deleteDir()
+            git 'https://github.com/reinhapa/openjdk-jmc-overrides.git'
+            sh 'unzip application/org.openjdk.jmc.updatesite.ide/target/*.zip -d repository'
+          }
+          dir('workspace/repository') {
             sh 'curl -X DELETE -u "${USERNAME}:${PASSWORD}" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide'
             sh 'find . -type f -exec curl -o /dev/null -# -u "${USERNAME}:${PASSWORD}" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/ \\;'
           }
           dir('application/org.openjdk.jmc.updatesite.rcp/target/repository') {
             sh 'curl -X DELETE -u "${USERNAME}:${PASSWORD}" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/rcp'
-            sh 'find . -type f -exec curl -o /dev/null -# -u "${USERNAME}:${PASSWORD}" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/rcp/ \\;'
           }
         }
       }
@@ -93,7 +99,6 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
         junit '**/target/surefire-reports/TEST-*.xml'
         archiveArtifacts 'target/products/*'
         archiveArtifacts 'application/org.openjdk.jmc.updatesite.ide/target/*.zip'
-        archiveArtifacts 'application/org.openjdk.jmc.updatesite.rcp/target/*.zip'
       }
     }
   } finally {
