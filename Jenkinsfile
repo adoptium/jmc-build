@@ -44,6 +44,10 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
          </activeProfiles>
        </settings>''', fileName: '.m2/settings.xml')])
     }
+    dir('workspace') {
+      deleteDir()
+      git 'https://github.com/reinhapa/openjdk-jmc-overrides.git'
+    }
     withEnv(["JAVA_HOME=${tool 'JDK8 u172'}", "PATH=$PATH:${tool 'apache-maven-3.5.3'}/bin"]) {
       dir('core') {
         stage('Build & test core libraries') {
@@ -65,6 +69,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
           sh 'mvn p2:site'
           sh 'mvn jetty:run &'
         }
+        sh 'cp workspace/overrides/latest . -rf'
         sh 'echo "updatesite.0=https://adoptopenjdk.jfrog.io/adoptopenjdk/p2-jmc-snapshots/rcp" >> application/org.openjdk.jmc.rcp.application/src/main/resources/updatesites.properties'
         sh 'mvn package'
 //        sh 'hg revert -C application/org.openjdk.jmc.rcp.application/src/main/resources/updatesites.properties'
@@ -81,17 +86,10 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
       }
       stage('Deploy update sites') {
         withCredentials([usernamePassword(credentialsId: 'missioncontrol-jenkins-bot', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-          dir('workspace') {
-            deleteDir()
-            git 'https://github.com/reinhapa/openjdk-jmc-overrides.git'
-            sh 'unzip application/org.openjdk.jmc.updatesite.ide/target/*.zip -d repository'
-          }
+          sh 'unzip application/org.openjdk.jmc.updatesite.ide/target/*.zip -d workspace/repository'
           dir('workspace/repository') {
             sh 'curl -X DELETE -u "${USERNAME}:${PASSWORD}" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide'
             sh 'find . -type f -exec curl -o /dev/null -# -u "${USERNAME}:${PASSWORD}" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/ \\;'
-          }
-          dir('application/org.openjdk.jmc.updatesite.rcp/target/repository') {
-            sh 'curl -X DELETE -u "${USERNAME}:${PASSWORD}" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/rcp'
           }
         }
       }
