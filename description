@@ -1,0 +1,21 @@
+Builds the <a href="http://openjdk.java.net/projects/jmc">OpenJDK Java Mission Control<a/>
+<p>
+<u>Update sites:</u>
+<table>
+  <tr>
+  	<td>IDE</td>
+    <td><a href="https://adoptopenjdk.jfrog.io/adoptopenjdk/p2-jmc-snapshots/ide">https://adoptopenjdk.jfrog.io/adoptopenjdk/p2-jmc-snapshots/ide</a></td>
+  </tr>
+</table>
+<p>
+<u>Maven repositories:</u>
+<table>
+  <tr>
+  	<td>Releases</td>
+    <td><a href="https://adoptopenjdk.jfrog.io/adoptopenjdk/list/jmc-libs/">https://adoptopenjdk.jfrog.io/adoptopenjdk/list/jmc-libs/</a></td>
+  </tr>
+  <tr>
+  	<td>Snapshot</td>
+    <td><a href="https://adoptopenjdk.jfrog.io/adoptopenjdk/list/jmc-libs-snapshots/">https://adoptopenjdk.jfrog.io/adoptopenjdk/list/jmc-libs-snapshots/</a></td>
+  </tr>
+</table>
