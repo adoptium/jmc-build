@@ -53,8 +53,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
         stage('Build & test core libraries') {
           // Run the maven build
           sh 'mvn clean'
-//          sh 'mvn install'
-          sh 'mvn install -DskipTests'
+          sh 'mvn install'
         }
         stage('Deploy core libraries') {
           withCredentials([usernamePassword(credentialsId: 'missioncontrol-jenkins-bot', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
@@ -84,8 +83,12 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
       }
       stage('Deploy update sites') {
         withCredentials([usernamePassword(credentialsId: 'missioncontrol-jenkins-bot', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-          sh 'unzip application/org.openjdk.jmc.updatesite.ide/target/*.zip -d workspace/repository'
-          dir('workspace/repository') {
+//          sh 'unzip application/org.openjdk.jmc.updatesite.ide/target/*.zip -d workspace/repository'
+//          dir('workspace/repository') {
+//            sh 'curl -X DELETE -u "${USERNAME}:${PASSWORD}" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide'
+//            sh 'find . -type f -exec curl -o /dev/null -s -u "${USERNAME}:${PASSWORD}" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/\'{}\' \\;'
+//          }
+          dir('application/org.openjdk.jmc.updatesite.ide/target/repository') {
             sh 'curl -X DELETE -u "${USERNAME}:${PASSWORD}" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide'
             sh 'find . -type f -exec curl -o /dev/null -s -u "${USERNAME}:${PASSWORD}" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/\'{}\' \\;'
           }
