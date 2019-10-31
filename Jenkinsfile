@@ -70,9 +70,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
           sh 'mvn jetty:run &'
         }
         sh 'cp workspace/overrides/latest . -rf'
-        sh 'echo "updatesite.0=https://adoptopenjdk.jfrog.io/adoptopenjdk/p2-jmc-snapshots/rcp" >> application/org.openjdk.jmc.rcp.application/src/main/resources/updatesites.properties'
         sh 'mvn package'
-//        sh 'hg revert -C application/org.openjdk.jmc.rcp.application/src/main/resources/updatesites.properties'
       }
       wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, displayNameOffset: 0, installationName: 'default', screen: '']) {
         stage('Unit Tests') {
@@ -89,7 +87,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
           sh 'unzip application/org.openjdk.jmc.updatesite.ide/target/*.zip -d workspace/repository'
           dir('workspace/repository') {
             sh 'curl -X DELETE -u "${USERNAME}:${PASSWORD}" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide'
-            sh 'find . -type f -exec curl -o /dev/null -# -u "${USERNAME}:${PASSWORD}" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/ \\;'
+            sh 'find . -type f -exec curl -o /dev/null -s -u "${USERNAME}:${PASSWORD}" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/\'{}\' \\;'
           }
         }
       }
