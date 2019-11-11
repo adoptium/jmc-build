@@ -45,7 +45,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
        </settings>''', fileName: '.m2/settings.xml')])
     }
     dir('workspace') {
-      git 'https://github.com/reinhapa/openjdk-jmc-overrides.git'
+      git branch: '7.0.0', url: 'https://github.com/reinhapa/openjdk-jmc-overrides.git'
     }
     withEnv(["JAVA_HOME=${tool 'JDK8 u172'}", "PATH=$PATH:${tool 'apache-maven-3.5.3'}/bin"]) {
       dir('core') {
@@ -68,8 +68,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
           sh 'mvn jetty:run &'
         }
         // apply overrides
-        sh 'cp workspace/overrides/release/7.0.0 . -rf'
-        sh 'cp workspace/overrides/release/shared . -rf'
+        sh 'cp workspace/overrides . -rf'
         sh 'mvn package'
       }
       wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, displayNameOffset: 0, installationName: 'default', screen: '']) {
