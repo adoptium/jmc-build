@@ -2,7 +2,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
   try {
     stage('Preparation') {
       properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false], [$class: 'JiraProjectProperty'], pipelineTriggers([pollSCM('@hourly')])])
-      checkout changelog: false, scm: [$class: 'MercurialSCM', credentialsId: '', installation: '(Default)', source: 'https://hg.openjdk.java.net/jmc/jmc']
+      checkout changelog: false, scm: [$class: 'MercurialSCM', credentialsId: '', installation: '(Default)', revision: '7.1.0-ga', revisionType: 'TAG', source: 'https://hg.openjdk.java.net/jmc/jmc7']
       fileOperations([fileCreateOperation(fileContent: '''<settings>
          <profiles>
            <profile>
@@ -45,7 +45,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
        </settings>''', fileName: '.m2/settings.xml')])
     }
     dir('workspace') {
-      git 'https://github.com/reinhapa/openjdk-jmc-overrides.git'
+      git branch: '7.1.0', url: 'https://github.com/reinhapa/openjdk-jmc-overrides.git'
     }
     withEnv(["JAVA_HOME=${tool 'JDK8 u172'}", "PATH=$PATH:${tool 'apache-maven-3.5.3'}/bin"]) {
       dir('core') {
@@ -68,7 +68,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
           sh 'mvn jetty:run &'
         }
         // apply overrides
-        sh 'cp workspace/overrides/latest . -rf'
+        sh 'cp workspace/overrides . -rf'
         sh 'mvn package'
       }
       wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, displayNameOffset: 0, installationName: 'default', screen: '']) {
