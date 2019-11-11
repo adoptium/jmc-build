@@ -10,6 +10,9 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
              <repositories>
                <repository>
                  <id>jmc-publish</id>
+                 <releases>
+                   <enabled>true</enabled>
+                 </releases>
                  <snapshots>
                    <enabled>false</enabled>
                  </snapshots>
@@ -21,6 +24,9 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
                  <releases>
                    <enabled>false</enabled>
                  </releases>
+                 <snapshots>
+                   <enabled>true</enabled>
+                 </snapshots>
                  <url>https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots</url>
                  <layout>default</layout>
                </repository>
