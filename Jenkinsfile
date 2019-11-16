@@ -48,7 +48,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
       git branch: '7.1.0', url: 'https://github.com/reinhapa/openjdk-jmc-overrides.git'
     }
     // apply overrides
-    sh 'cp workspace/overrides . -rf'
+    sh 'cp workspace/overrides/* . -rf'
     // start build process
     withEnv(["JAVA_HOME=${tool 'JDK8 u172'}", "PATH=$PATH:${tool 'apache-maven-3.5.3'}/bin"]) {
       dir('core') {
