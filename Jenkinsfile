@@ -2,7 +2,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
   try {
     stage('Preparation') {
       properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false], [$class: 'JiraProjectProperty'], pipelineTriggers([pollSCM('@hourly')])])
-      checkout changelog: false, scm: [$class: 'MercurialSCM', credentialsId: '', installation: '(Default)', revision: '7.1.0-ga', revisionType: 'TAG', source: 'https://hg.openjdk.java.net/jmc/jmc7']
+      checkout changelog: false, scm: [$class: 'MercurialSCM', credentialsId: '', installation: '(Default)', revision: '7.1.0-gac', revisionType: 'TAG', source: 'https://hg.openjdk.java.net/jmc/jmc7']
       fileOperations([fileCreateOperation(fileContent: '''<settings>
          <profiles>
            <profile>
@@ -56,7 +56,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
         }
         stage('Deploy core libraries') {
           withCredentials([usernamePassword(credentialsId: 'missioncontrol-jenkins-bot', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-            sh "mvn deploy --settings ${WORKSPACE}/.m2/settings.xml -Dpublish.user=${USERNAME} -Dpublish.password=${PASSWORD} -Drelease.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs -Dsnapshot.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true -DskipNexusStagingDeployMojo=true"
+            sh "mvn deploy --settings ${WORKSPACE}/.m2/settings.xml -Dpublish.user=${USERNAME} -Dpublish.password=${PASSWORD} -Drelease.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs -Dsnapshot.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true"
           }
         }
       }
