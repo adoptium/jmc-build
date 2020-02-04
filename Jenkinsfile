@@ -78,7 +78,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
         }
         stage('UI Tests') {
           echo 'currently disabled'
-//          sh 'mvn verify -P uitests'
+          sh 'mvn verify -P uitests'
         }
       }
       stage('Deploy update sites') {
