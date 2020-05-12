@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="windows-1252"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--   
-   Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
+   Copyright (c) 2018, 2019, Oracle and/or its affiliates. All rights reserved.
    
    DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
    
@@ -35,7 +35,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.openjdk.jmc</groupId>
 	<artifactId>missioncontrol</artifactId>
-	<version>7.0.0-SNAPSHOT</version>
+	<version>7.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>JDK Mission Control</name>
 	<description>JDK Mission Control is an advanced set of tools that enables 
@@ -83,11 +83,13 @@
 		<maven.resources.version>3.0.2</maven.resources.version>
 		<spotbugs.version>3.1.10</spotbugs.version>
 		<buildId>${user.name}</buildId>
+		<!-- The version of the JDK embedded. When not embedding a JDK (this is 
+			usually the case), leave this empty. If embedding a JDK, include a comma 
+			and space, e.g. <jdkVersion>, JDK 12.0.2</jdkVersion> -->
+		<jdkVersion></jdkVersion>
 		<!-- Critical Patch Update Id. Used in a release where _only_ the embedded
-		     JDK has changed. Set to .[cpu sequence number], e.g. .1 -->
-		<patchId/>
-		<!-- The version of the JDK to embed, e.g. 12.0.2 -->
-		<jdkVersion/>
+			JDK has changed. Set to .[cpu sequence number], e.g. .1 -->
+		<patchId></patchId>
 		<scmConnection>scm:hg:http://hg.openjdk.java.net/jmc/jmc</scmConnection>
 	</properties>
 	<scm>
@@ -105,7 +107,7 @@
 	</distributionManagement>
 	<profiles>
 		<profile>
-			<id>2019-03</id>
+			<id>2019-09</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -119,8 +121,50 @@
 							<target>
 								<artifact>
 									<groupId>org.openjdk.jmc</groupId>
+									<artifactId>platform-definition-2019-09</artifactId>
+									<version>7.1.0-SNAPSHOT</version>
+								</artifact>
+							</target>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>2019-06</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.eclipse.tycho</groupId>
+						<artifactId>target-platform-configuration</artifactId>
+						<version>${tycho.version}</version>
+						<configuration>
+							<target>
+								<artifact>
+									<groupId>org.openjdk.jmc</groupId>
+									<artifactId>platform-definition-2019-06</artifactId>
+									<version>7.1.0-SNAPSHOT</version>
+								</artifact>
+							</target>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>2019-03</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.eclipse.tycho</groupId>
+						<artifactId>target-platform-configuration</artifactId>
+						<version>${tycho.version}</version>
+						<configuration>
+							<target>
+								<artifact>
+									<groupId>org.openjdk.jmc</groupId>
 									<artifactId>platform-definition-2019-03</artifactId>
-									<version>7.0.0-SNAPSHOT</version>
+									<version>7.1.0-SNAPSHOT</version>
 								</artifact>
 							</target>
 						</configuration>
@@ -141,7 +185,7 @@
 								<artifact>
 									<groupId>org.openjdk.jmc</groupId>
 									<artifactId>platform-definition-2018-12</artifactId>
-									<version>7.0.0-SNAPSHOT</version>
+									<version>7.1.0-SNAPSHOT</version>
 								</artifact>
 							</target>
 						</configuration>
@@ -162,7 +206,7 @@
 								<artifact>
 									<groupId>org.openjdk.jmc</groupId>
 									<artifactId>platform-definition-2018-09</artifactId>
-									<version>7.0.0-SNAPSHOT</version>
+									<version>7.1.0-SNAPSHOT</version>
 								</artifact>
 							</target>
 						</configuration>
@@ -183,7 +227,7 @@
 								<artifact>
 									<groupId>org.openjdk.jmc</groupId>
 									<artifactId>platform-definition-photon</artifactId>
-									<version>7.0.0-SNAPSHOT</version>
+									<version>7.1.0-SNAPSHOT</version>
 								</artifact>
 							</target>
 						</configuration>
@@ -198,6 +242,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>${maven.deploy.version}</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
@@ -259,10 +306,9 @@
 					</execution>
 				</executions>
 				<configuration>
-					<format>'v'yyyyMMdd'-'HHmm</format>
 					<archive>
 						<manifestEntries>
-							<Built-By/>
+							<Built-By />
 						</manifestEntries>
 					</archive>
 				</configuration>
