@@ -51,7 +51,7 @@ node('build-scaleway-x64-ubuntu-16-04-2') {
        </settings>''', fileName: '.m2/settings.xml')])
     }
     dir('workspace') {
-      git branch: '7.0.0', url: 'https://github.com/reinhapa/openjdk-jmc-overrides.git'
+      git branch: '7.0.0', url: 'https://github.com/AdoptOpenJDK/openjdk-jmc-overrides.git'
     }
     // apply overrides
     sh 'cp workspace/overrides/* . -rf'
