@@ -1,7 +1,18 @@
 node('build-scaleway-x64-ubuntu-16-04-2') {
   stage('Preparation') {
-    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false], [$class: 'JiraProjectProperty'], pipelineTriggers([pollSCM('@hourly')])])
-    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/openjdk/jmc.git']]])
+    properties([
+      buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), 
+      [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false], 
+      [$class: 'JiraProjectProperty'], pipelineTriggers([pollSCM('@daily')])
+    ])
+    checkout([
+      $class: 'GitSCM', 
+      branches: [[name: '*/master']], 
+      doGenerateSubmoduleConfigurations: false, 
+      extensions: [], 
+      submoduleCfg: [], 
+      userRemoteConfigs: [[url: 'https://github.com/openjdk/jmc.git']]
+    ])
     fileOperations([fileCreateOperation(fileContent: '''<settings>
        <profiles>
          <profile>
