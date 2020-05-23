@@ -1,4 +1,4 @@
-node('build-scaleway-x64-ubuntu-16-04-2') {
+node('build-scaleway-ubuntu1604-x64-1') {
   try {
     stage('Preparation') {
       properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false], [$class: 'JiraProjectProperty'], pipelineTriggers([pollSCM('@hourly')])])
