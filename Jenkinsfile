@@ -1,4 +1,4 @@
-node('build && linux && x64') {
+node('build-scaleway-ubuntu1604-x64-1') {
   stage('Preparation') {
     properties([
       buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), 
