@@ -99,7 +99,7 @@ node('build-scaleway-ubuntu1604-x64-1') {
 //        dir('application/org.openjdk.jmc.updatesite.ide/target/repository') {
 //          sh 'curl -X DELETE -u "${USERNAME}:${PASSWORD}" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide'
 //          sh 'find . -type f -exec curl -o /dev/null -s -u "${USERNAME}:${PASSWORD}" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/\'{}\' \\;'
-        }
+//        }
       }
     }
     stage('Archive artifacts') {
