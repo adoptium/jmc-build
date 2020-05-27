@@ -98,7 +98,6 @@ node('build-scaleway-ubuntu1604-x64-1') {
       stage('Archive artifacts') {
         junit '**/target/surefire-reports/TEST-*.xml'
         archiveArtifacts 'target/products/*'
-        archiveArtifacts 'application/org.openjdk.jmc.updatesite.ide/target/*.zip'
       }
     }
   } finally {
