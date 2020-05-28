@@ -59,13 +59,14 @@ node('build-scaleway-ubuntu1604-x64-1') {
   }
   // apply overrides
   sh 'cp workspace/overrides/* . -rf'
+  // change to final version
+  sh 'find . ! -path "*/.hg/**" -type f -name "pom.xml" -exec sed -i s/"7.1.1-SNAPSHOT"/"7.1.1"/ {} \\;'
   // start build process
   withEnv(["JAVA_HOME=${tool 'JDK8 u172'}", "PATH=$PATH:${tool 'apache-maven-3.5.3'}/bin"]) {
     dir('core') {
       stage('Build & test core libraries') {
         // Run the maven build
         sh 'mvn clean'
-        sh 'mvn versions:set -DnewVersion=7.1.1'
         sh 'mvn install'
       }
       stage('Deploy core libraries') {
@@ -78,7 +79,6 @@ node('build-scaleway-ubuntu1604-x64-1') {
       // Run the maven build
       dir('releng/third-party') {
         sh 'mvn clean'
-        sh 'mvn versions:set -DnewVersion=7.1.1'
         sh 'mvn p2:site'
         sh 'mvn jetty:run &'
       }
