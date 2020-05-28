@@ -61,6 +61,7 @@ node('build-scaleway-ubuntu1604-x64-1') {
   sh 'cp workspace/overrides/* . -rf'
   // change to final version
   sh 'find . ! -path "*/.hg/**" -type f -name "pom.xml" -exec sed -i s/"7.1.1-SNAPSHOT"/"7.1.1"/ {} \\;'
+  sh 'find . ! -path "*/.hg/**" -type f \\( -name "feature.xml" -o -name "MANIFEST.MF" \\) -exec sed -i s/"7.1.1.qualifier"/"7.1.1"/ {} \\;'
   // start build process
   withEnv(["JAVA_HOME=${tool 'JDK8 u172'}", "PATH=$PATH:${tool 'apache-maven-3.5.3'}/bin"]) {
     dir('core') {
