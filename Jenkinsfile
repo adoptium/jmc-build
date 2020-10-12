@@ -60,7 +60,7 @@ node('build-scaleway-ubuntu1604-x64-1') {
   // apply overrides
   sh 'cp workspace/overrides/latest/* . -rf'
   // start build process
-  withEnv(["JAVA_HOME=${tool 'JDK8 u172'}", "PATH=$PATH:${tool 'apache-maven-3.5.3'}/bin"]) {
+  withEnv(["JAVA_HOME=$JDK11_BOOT_DIR", "PATH=$PATH:${tool 'apache-maven-3.5.3'}/bin"]) {
     dir('core') {
       stage('Build & test core libraries') {
         // Run the maven build
