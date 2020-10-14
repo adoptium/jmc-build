@@ -60,7 +60,9 @@ node('build-scaleway-ubuntu1604-x64-1') {
   // apply overrides
   sh 'cp workspace/overrides/latest/* . -rf'
   // start build process
-  withEnv(["JAVA_HOME=$JDK11_BOOT_DIR", "PATH=$PATH:${tool 'apache-maven-3.5.3'}/bin"]) {
+  withEnv(["JAVA_HOME=${tool 'JDK11'}", "PATH=$PATH:${tool 'apache-maven-3.5.3'}/bin"]) {
+  	// print some info about the used JDK
+    sh '$JAVA_HOME/bin/java -version'
     dir('core') {
       stage('Build & test core libraries') {
         // Run the maven build
@@ -82,17 +84,23 @@ node('build-scaleway-ubuntu1604-x64-1') {
       }
       sh 'mvn package'
     }
-    wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, displayNameOffset: 0, installationName: 'default', screen: '']) {
-      stage('Unit Tests') {
-        sh 'mvn verify'
-      }
-      stage('UI Tests') {
-        echo 'currently disabled'
-        try {
-          sh 'mvn verify -P uitests'
-        } catch (e) {
-          echo  'ignoring error for now'
+    try {
+      wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, displayNameOffset: 0, installationName: 'default', screen: '']) {
+        stage('Unit Tests') {
+          sh 'mvn verify'
         }
+        stage('UI Tests') {
+          echo 'currently disabled'
+          try {
+            sh 'mvn verify -P uitests'
+          } catch (e) {
+            echo  'ignoring error for now'
+          }
+        }
+      }
+    } finally {
+      stage('Collect test results') {
+        junit '**/target/surefire-reports/TEST-*.xml'
       }
     }
     stage('Deploy update sites') {
@@ -104,7 +112,7 @@ node('build-scaleway-ubuntu1604-x64-1') {
       }
     }
     stage('Archive artifacts') {
-      junit '**/target/surefire-reports/TEST-*.xml'
+      junit allowEmptyResults: true, testResults: '**/target/surefire-reports/TEST-*.xml'
       dir('target/products') {
         sh 'mv -f org.openjdk.jmc-win32.win32.x86_64.zip      org.openjdk.jmc-8.0.0-SNAPSHOT-win32.win32.x86_64.zip'
         sh 'mv -f org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz  org.openjdk.jmc-8.0.0-SNAPSHOT-macosx.cocoa.x86_64.tar.gz'
@@ -112,9 +120,6 @@ node('build-scaleway-ubuntu1604-x64-1') {
       }
       archiveArtifacts 'target/products/*'
       archiveArtifacts 'application/org.openjdk.jmc.updatesite.ide/target/*.zip'
-    }
-    stage('Test results') {
-      junit '**/target/surefire-reports/TEST-*.xml'
     }
   }
 }
