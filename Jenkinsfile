@@ -66,13 +66,20 @@ node('build-scaleway-ubuntu1604-x64-1') {
     dir('core') {
       stage('Build & test core libraries') {
         // Run the maven build
-        sh 'mvn clean'
+        sh 'mvn verify'
         sh 'mvn install'
       }
       stage('Deploy core libraries') {
         withCredentials([usernamePassword(credentialsId: 'missioncontrol-jenkins-bot', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
           sh "mvn deploy --settings ${WORKSPACE}/.m2/settings.xml -Dpublish.user=${USERNAME} -Dpublish.password=${PASSWORD} -Drelease.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs -Dsnapshot.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true"
         }
+      }
+    }
+    dir('agent') {
+      stage('Build & test agent') {
+        // Run the maven build
+        sh 'mvn verify'
+        sh 'mvn install'
       }
     }
     stage('Build') {
@@ -118,6 +125,7 @@ node('build-scaleway-ubuntu1604-x64-1') {
         sh 'mv -f org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz  org.openjdk.jmc-8.0.0-SNAPSHOT-macosx.cocoa.x86_64.tar.gz'
         sh 'mv -f org.openjdk.jmc-linux.gtk.x86_64.tar.gz     org.openjdk.jmc-8.0.0-SNAPSHOT-linux.gtk.x86_64.tar.gz'
       }
+      archiveArtifacts 'agent/target/org.openjdk.jmc.agent-*'
       archiveArtifacts 'target/products/*'
       archiveArtifacts 'application/org.openjdk.jmc.updatesite.ide/target/*.zip'
     }
