@@ -1,4 +1,4 @@
-node('build-scaleway-ubuntu1604-x64-1') {
+node('x64&&linux&&ci.role.test') {
   stage('Preparation') {
     properties([
       buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), 
@@ -71,7 +71,7 @@ node('build-scaleway-ubuntu1604-x64-1') {
       }
       stage('Deploy core libraries') {
         withCredentials([usernamePassword(credentialsId: 'missioncontrol-jenkins-bot', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-          sh "mvn deploy --settings ${WORKSPACE}/.m2/settings.xml -Dpublish.user=${USERNAME} -Dpublish.password=${PASSWORD} -Drelease.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs -Dsnapshot.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true"
+          sh 'mvn deploy --settings $WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs -Dsnapshot.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true'
         }
       }
     }
@@ -92,7 +92,7 @@ node('build-scaleway-ubuntu1604-x64-1') {
       sh 'mvn package'
     }
     try {
-      wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, displayNameOffset: 0, installationName: 'default', screen: '']) {
+      wrap([$class: 'Xvfb', autoDisplayName: true, timeout:10]) {
         stage('Unit Tests') {
           sh 'mvn verify'
         }
@@ -113,8 +113,8 @@ node('build-scaleway-ubuntu1604-x64-1') {
     stage('Deploy update sites') {
       withCredentials([usernamePassword(credentialsId: 'missioncontrol-jenkins-bot', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
         dir('application/org.openjdk.jmc.updatesite.ide/target/repository') {
-          sh 'curl -X DELETE -u "${USERNAME}:${PASSWORD}" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide'
-          sh 'find . -type f -exec curl -o /dev/null -s -u "${USERNAME}:${PASSWORD}" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/\'{}\' \\;'
+          sh 'curl -X DELETE -u "$USERNAME:$PASSWORD" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide'
+          sh 'find . -type f -exec curl -o /dev/null -s -u "$USERNAME:$PASSWORD" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/\'{}\' \\;'
         }
       }
     }
