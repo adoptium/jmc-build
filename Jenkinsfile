@@ -1,4 +1,4 @@
-node('x64&&linux&&ci.role.test') {
+node('build-scaleway-ubuntu1604-x64-1') {
   try {
     def overridesUrl = 'https://github.com/AdoptOpenJDK/openjdk-jmc-overrides.git'
     def overridesBranch = '7.x.x'
@@ -97,15 +97,15 @@ node('x64&&linux&&ci.role.test') {
           stage('Unit Tests') {
             try {
               echo 'currently disabled'
-            sh 'mvn verify'
+//              sh 'mvn verify'
             } catch (e) {
               echo  'ignoring error for now'
             }
           }
           stage('UI Tests') {
             try {
-            echo 'currently disabled'
-              sh 'mvn verify -P uitests'
+              echo 'currently disabled'
+//              sh 'mvn verify -P uitests'
             } catch (e) {
               echo  'ignoring error for now'
             }
