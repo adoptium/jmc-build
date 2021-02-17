@@ -2,8 +2,8 @@ node('x64&&linux&&ci.role.test') {
   try {
     def overridesUrl = 'https://github.com/AdoptOpenJDK/openjdk-jmc-overrides.git'
     def overridesBranch = '8.x.x'
-    def jmcBranch = 'master'
-    def jmcVersion = '8.0.0-SNAPSHOT'
+    def jmcBranch = '8.0.0-ga'
+    def jmcVersion = '8.0.0'
     stage('Preparation') {
       properties([
         buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')),
@@ -12,7 +12,7 @@ node('x64&&linux&&ci.role.test') {
       ])
       checkout([
         $class: 'GitSCM',
-        branches: [[name: '*/jmc8']],
+        branches: [[name: jmcBranch]],
         doGenerateSubmoduleConfigurations: false,
         extensions: [],
         submoduleCfg: [],
