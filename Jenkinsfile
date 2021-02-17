@@ -12,7 +12,7 @@ node('x64&&linux&&ci.role.test') {
       ])
       checkout([
         $class: 'GitSCM',
-        branches: [[name: '*/master']],
+        branches: [[name: jmcBranch]],
         doGenerateSubmoduleConfigurations: false,
         extensions: [],
         submoduleCfg: [],
