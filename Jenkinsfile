@@ -1,4 +1,4 @@
-node('x64&&linux&&ci.role.test') {
+node('x64&&linux&&build') {
   try {
     def overridesUrl = 'https://github.com/AdoptOpenJDK/openjdk-jmc-overrides.git'
     def overridesBranch = '8.x.x'
