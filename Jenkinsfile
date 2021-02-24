@@ -1,4 +1,4 @@
-node('build-scaleway-ubuntu1604-x64-1') {
+node('x64&&linux&&build') {
   try {
     def overridesUrl = 'https://github.com/AdoptOpenJDK/openjdk-jmc-overrides.git'
     def overridesBranch = '7.x.x'
