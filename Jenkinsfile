@@ -67,6 +67,9 @@ node('x64&&linux&&build') {
     // change to final version
     sh 'find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"8.0.0-SNAPSHOT"/"8.0.0"/ {} \\;'
     sh 'find . ! -path "*/.git/**" -type f \\( -name "feature.xml" -o -name "MANIFEST.MF" \\) -exec sed -i s/"8.0.0.qualifier"/"8.0.0"/ {} \\;'
+    // change to final version
+    sh 'find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"1.0.0-SNAPSHOT"/"1.0.0"/ {} \\;'
+    sh 'find . ! -path "*/.git/**" -type f \\( -name "feature.xml" -o -name "MANIFEST.MF" \\) -exec sed -i s/"1.0.0.qualifier"/"1.0.0"/ {} \\;'
     // start build process
     withEnv(["JAVA_HOME=${tool 'JDK11'}", "PATH=$PATH:${tool 'apache-maven-3.5.3'}/bin"]) {
       // print some info about used JDK & Maven
