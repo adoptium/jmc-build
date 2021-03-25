@@ -81,12 +81,6 @@ jobs:
           PASSWORD: ${{ secrets.PASSWORD }}
         working-directory: core
 
-      - name: Build & test agent
-        run: |
-          mvn verify
-          mvn install
-        working-directory: agent
-
       - name: Build
         run: |
           mvn clean
