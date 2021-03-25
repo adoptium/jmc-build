@@ -1,0 +1,183 @@
+name: Build
+on:
+  workflow_dispatch:
+    inputs:
+        release:
+          description: 'Set to True if are running a release'     
+          required: true
+          default: 'False'
+        version:
+          description: 'If running a release, set the version e.g (7.1.1)'     
+          required: true
+          default: '7.1.1'
+        agentVersion:
+          description: 'If running a release, set the agent version e.g (1.0.0)'     
+          required: true
+          default: '1.0.0'
+
+jobs:
+  release:
+    if: github.event.inputs.release == 'True'
+    name: Create Draft release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+    - name: Create Draft Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.event.inputs.version }}
+        release_name: 'Official Release of ${{ github.event.inputs.version }}'
+        draft: true
+        prerelease: false
+
+  build:
+    if: always()
+    needs: release
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout JMC
+        run: hg clone https://hg.openjdk.java.net/jmc/jmc7 --rev ${{ github.event.inputs.version }}-ga ./
+
+      - name: Checkout JMC Overrides
+        uses: actions/checkout@v2
+        with:
+          path: workspace
+
+      - name: Create .m2/settings.xml
+        run: |
+          mkdir .m2
+          cp workspace/.github/workflows/settings.xml .m2/settings.xml
+
+      - name: Apply overrides
+        run: cp workspace/overrides/* . -rvf
+
+      - name: Change to final version
+        run: |
+          find . ! -path "*/.hg/**" -type f -name "pom.xml" -exec sed -i s/"${{ github.event.inputs.version }}-SNAPSHOT"/"${{ github.event.inputs.version }}"/ {} \;
+          find . ! -path "*/.hg/**" -type f \( -name "feature.xml" -o -name "MANIFEST.MF" \) -exec sed -i s/"${{ github.event.inputs.version }}.qualifier"/"${{ github.event.inputs.version }}"/ {} \;
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Build & test core libraries
+        run: |
+          mvn verify
+          mvn install
+        working-directory: core
+
+      - name: Deploy core libraries
+        if: github.event.inputs.release == 'True'
+        run: |
+          mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs -Dsnapshot.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+        working-directory: core
+
+      - name: Build & test agent
+        run: |
+          mvn verify
+          mvn install
+        working-directory: agent
+
+      - name: Build
+        run: |
+          mvn clean
+          mvn p2:site
+          mvn jetty:run &
+          cd ../../
+          mvn package
+        working-directory: releng/third-party
+
+      # - name: Run Unit Tests
+      #   uses: GabrielBB/xvfb-action@v1
+      #   with:
+      #     run: mvn verify
+
+      # - name: Run UI Tests
+      #   continue-on-error: true
+      #   uses: GabrielBB/xvfb-action@v1
+      #   with:
+      #     # Ignore UI failures for now
+      #     run: mvn verify -P uitests
+
+      - name: Deploy update sites
+        if: github.event.inputs.release == 'True'
+        run: |
+          curl -X DELETE -u "$USERNAME:$PASSWORD" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide
+          find . -type f -exec curl -o /dev/null -s -u "$USERNAME:$PASSWORD" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/\'{}\' \;
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+        working-directory: application/org.openjdk.jmc.updatesite.ide/target/repository
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: jmc
+          path: |
+            agent/target/org.openjdk.jmc.agent-*.jar
+            target/products/*.tar.gz
+            target/products/*.zip
+            application/org.openjdk.jmc.updatesite.ide/target/*.zip
+
+      - name: Upload org.openjdk.jmc.agent-${{ github.event.inputs.agentVersion }}.jar
+        uses: actions/upload-release-asset@v1
+        if: github.event.inputs.release == 'True'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: agent/target/org.openjdk.jmc.agent-${{ github.event.inputs.agentVersion }}.jar
+          asset_name: org.openjdk.jmc.agent-${{ github.event.inputs.agentVersion }}.jar
+          asset_content_type: application/zip
+
+      - name: Upload 	org.openjdk.jmc.updatesite.ide-${{ github.event.inputs.version }}.zip
+        uses: actions/upload-release-asset@v1
+        if: github.event.inputs.release == 'True'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: application/org.openjdk.jmc.updatesite.ide/target/org.openjdk.jmc.updatesite.ide-${{ github.event.inputs.version }}.zip
+          asset_name: org.openjdk.jmc.updatesite.ide-${{ github.event.inputs.version }}.zip
+          asset_content_type: application/zip
+
+      - name: Upload org.openjdk.jmc-linux.gtk.x86_64.tar.gz
+        uses: actions/upload-release-asset@v1
+        if: github.event.inputs.release == 'True'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: target/products/org.openjdk.jmc-linux.gtk.x86_64.tar.gz
+          asset_name: org.openjdk.jmc-${{ github.event.inputs.version }}-linux.gtk.x86_64.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
+        uses: actions/upload-release-asset@v1
+        if: github.event.inputs.release == 'True'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: target/products/org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
+          asset_name: org.openjdk.jmc-${{ github.event.inputs.version }}-macosx.cocoa.x86_64.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload  org.openjdk.jmc-win32.win32.x86_64.zip
+        uses: actions/upload-release-asset@v1
+        if: github.event.inputs.release == 'True'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: target/products/org.openjdk.jmc-win32.win32.x86_64.zip 
+          asset_name: org.openjdk.jmc-${{ github.event.inputs.version }}-win32.win32.x86_64.zip
+          asset_content_type: application/zip
