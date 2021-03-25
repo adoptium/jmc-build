@@ -61,10 +61,10 @@ jobs:
 
       - name: Change to final version
         run: |
-          find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"${{ github.event.inputs.version }}-SNAPSHOT"/"${{ github.event.inputs.version }}"/ {} \\;
-          find . ! -path "*/.git/**" -type f \\( -name "feature.xml" -o -name "MANIFEST.MF" \\) -exec sed -i s/"${{ github.event.inputs.version }}.qualifier"/"${{ github.event.inputs.version }}"/ {} \\;
-          find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"${{ github.event.inputs.agentVersion }}-SNAPSHOT"/"${{ github.event.inputs.agentVersion }}"/ {} \\;
-          find . ! -path "*/.git/**" -type f \\( -name "feature.xml" -o -name "MANIFEST.MF" \\) -exec sed -i s/"${{ github.event.inputs.agentVersion }}.qualifier"/"${{ github.event.inputs.agentVersion }}"/ {} \\;
+          find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"${{ github.event.inputs.version }}-SNAPSHOT"/"${{ github.event.inputs.version }}"/ {} \;
+          find . ! -path "*/.git/**" -type f \\( -name "feature.xml" -o -name "MANIFEST.MF" \\) -exec sed -i s/"${{ github.event.inputs.version }}.qualifier"/"${{ github.event.inputs.version }}"/ {} \;
+          find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"${{ github.event.inputs.agentVersion }}-SNAPSHOT"/"${{ github.event.inputs.agentVersion }}"/ {} \;
+          find . ! -path "*/.git/**" -type f \\( -name "feature.xml" -o -name "MANIFEST.MF" \\) -exec sed -i s/"${{ github.event.inputs.agentVersion }}.qualifier"/"${{ github.event.inputs.agentVersion }}"/ {} \;
 
       - name: Set up JDK 11
         uses: actions/setup-java@v1
@@ -77,14 +77,14 @@ jobs:
           mvn install
         working-directory: core
 
-      # - name: Deploy core libraries
-      #   if: github.event.inputs.release == 'True'
-      #   run: |
-      #     mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs -Dsnapshot.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
-      #   env:
-      #     USERNAME: ${{ secrets.USERNAME }}
-      #     PASSWORD: ${{ secrets.PASSWORD }}
-      #   working-directory: core
+      - name: Deploy core libraries
+        if: github.event.inputs.release == 'True'
+        run: |
+          mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs -Dsnapshot.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+        working-directory: core
 
       - name: Build & test agent
         run: |
@@ -113,15 +113,15 @@ jobs:
           # Ignore UI failures for now
           run: mvn verify -P uitests
 
-      # - name: Deploy update sites
-      #   if: github.event.inputs.release == 'True'
-      #   run: |
-      #     curl -X DELETE -u "$USERNAME:$PASSWORD" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide
-      #     find . -type f -exec curl -o /dev/null -s -u "$USERNAME:$PASSWORD" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/\'{}\' \\;
-      #   env:
-      #     USERNAME: ${{ secrets.USERNAME }}
-      #     PASSWORD: ${{ secrets.PASSWORD }}
-      #   working-directory: application/org.openjdk.jmc.updatesite.ide/target/repository
+      - name: Deploy update sites
+        if: github.event.inputs.release == 'True'
+        run: |
+          curl -X DELETE -u "$USERNAME:$PASSWORD" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide
+          find . -type f -exec curl -o /dev/null -s -u "$USERNAME:$PASSWORD" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/\'{}\' \\;
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+        working-directory: application/org.openjdk.jmc.updatesite.ide/target/repository
 
       - uses: actions/upload-artifact@v2
         with:
