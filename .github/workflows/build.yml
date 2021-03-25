@@ -154,7 +154,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: target/products/org.openjdk.jmc-${{ github.event.inputs.version }}-linux.gtk.x86_64.tar.gz
+          asset_path: target/products/org.openjdk.jmc-linux.gtk.x86_64.tar.gz
           asset_name: org.openjdk.jmc-${{ github.event.inputs.version }}-linux.gtk.x86_64.tar.gz
           asset_content_type: application/zip
 
@@ -165,17 +165,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: target/products/org.openjdk.jmc-${{ github.event.inputs.version }}-macosx.cocoa.x86_64.tar.gz
+          asset_path: target/products/org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
           asset_name: org.openjdk.jmc-${{ github.event.inputs.version }}-macosx.cocoa.x86_64.tar.gz
           asset_content_type: application/zip
 
-      - name: Upload  org.openjdk.jmc-win32.win32.x86_64.zip
+      - name: Upload org.openjdk.jmc-win32.win32.x86_64.zip
         uses: actions/upload-release-asset@v1
         if: github.event.inputs.release == 'True'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: target/products/org.openjdk.jmc-${{ github.event.inputs.version }}-win32.win32.x86_64.zip
+          asset_path: target/products/org.openjdk.jmc-win32.win32.x86_64.zip
           asset_name: org.openjdk.jmc-${{ github.event.inputs.version }}-win32.win32.x86_64.zip
           asset_content_type: application/zip
