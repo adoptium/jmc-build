@@ -11,9 +11,9 @@ on:
           required: true
           default: '8.1.0-SNAPSHOT'
         agentVersion:
-          description: 'If running a release, set the agent version e.g (1.0.0)'     
+          description: 'If running a release, set the agent version e.g (1.0.0-SNAPSHOT)'     
           required: true
-          default: '1.0.0'
+          default: '1.0.0-SNAPSHOT'
 
 jobs:
   release:
