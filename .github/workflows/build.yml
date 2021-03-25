@@ -7,9 +7,13 @@ on:
           required: true
           default: 'False'
         version:
-          description: 'If running a release, set the version e.g (8.1.0)'     
+          description: 'If running a release, set the version e.g (8.1.0-SNAPSHOT)'
           required: true
-          default: '8.1.0'
+          default: '8.1.0-SNAPSHOT'
+        agentVersion:
+          description: 'If running a release, set the agent version e.g (1.0.0)'     
+          required: true
+          default: '1.0.0'
   pull_request:
     branches:
       - master
@@ -29,7 +33,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.event.inputs.version }}
-        release_name: 'Official Release of ${{ github.event.inputs.version }}'
+        release_name: 'Release of ${{ github.event.inputs.version }}'
         draft: true
         prerelease: false
 
@@ -93,21 +97,17 @@ jobs:
           mvn package
         working-directory: releng/third-party
 
-      - name: Run Unit Tests
-        uses: GabrielBB/xvfb-action@v1
-        with:
-          run: mvn verify
+      # - name: Run Unit Tests
+      #   uses: GabrielBB/xvfb-action@v1
+      #   with:
+      #     run: mvn verify
 
-      - name: Run UI Tests
-        uses: GabrielBB/xvfb-action@v1
-        with:
-          # Ignore UI failures for now
-          run: mvn verify -P uitests || true
-
-      - uses: KyleAure/junit-report-annotations-action@1.5
-        with:
-          name: "tests"
-          path: "**/target/surefire-reports/TEST-*.xml"
+      # - name: Run UI Tests
+      #   # Ignore UI failures for now
+      #   continue-on-error: true
+      #   uses: GabrielBB/xvfb-action@v1
+      #   with:
+      #     run: mvn verify -P uitests
 
       - name: Deploy update sites
         if: github.event.inputs.release == 'True'
@@ -119,15 +119,6 @@ jobs:
           PASSWORD: ${{ secrets.PASSWORD }}
         working-directory: application/org.openjdk.jmc.updatesite.ide/target/repository
 
-      - name: Archive artifacts
-        run: |
-          mv -f org.openjdk.jmc-win32.win32.x86_64.zip org.openjdk.jmc-${jmcVersion}-win32.win32.x86_64.zip
-          mv -f org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz org.openjdk.jmc-${jmcVersion}-macosx.cocoa.x86_64.tar.gz
-          mv -f org.openjdk.jmc-linux.gtk.x86_64.tar.gz org.openjdk.jmc-${jmcVersion}-linux.gtk.x86_64.tar.gz
-        env:
-          jmcVersion: 8.1.0-SNAPSHOT
-        working-directory: target/products
-
       - uses: actions/upload-artifact@v2
         with:
           name: jmc
@@ -137,49 +128,57 @@ jobs:
             target/products/*.zip
             application/org.openjdk.jmc.updatesite.ide/target/*.zip
 
-      - name: Upload org.openjdk.jmc.agent-1.0.0-SNAPSHOT.jar
+      - name: Upload org.openjdk.jmc.agent-${{ github.event.inputs.agentVersion }}.jar
         uses: actions/upload-release-asset@v1
         if: github.event.inputs.release == 'True'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: agent/target/org.openjdk.jmc.agent-1.0.0-SNAPSHOT.jar
-          asset_name: org.openjdk.jmc.agent-1.0.0-SNAPSHOT.jar
+          asset_path: agent/target/org.openjdk.jmc.agent-${{ github.event.inputs.agentVersion }}.jar
+          asset_name: org.openjdk.jmc.agent-${{ github.event.inputs.agentVersion }}.jar
           asset_content_type: application/zip
 
-      - name: Upload org.openjdk.jmc-${jmcVersion}-linux.gtk.x86_64.tar.gz
+      - name: Upload 	org.openjdk.jmc.updatesite.ide-${{ github.event.inputs.version }}.zip
         uses: actions/upload-release-asset@v1
         if: github.event.inputs.release == 'True'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          jmcVersion: 8.1.0-SNAPSHOT
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: target/products/org.openjdk.jmc-${jmcVersion}-linux.gtk.x86_64.tar.gz
-          asset_name: org.openjdk.jmc-${jmcVersion}-linux.gtk.x86_64.tar.gz
+          asset_path: application/org.openjdk.jmc.updatesite.ide/target/org.openjdk.jmc.updatesite.ide-${{ github.event.inputs.version }}.zip
+          asset_name: org.openjdk.jmc.updatesite.ide-${{ github.event.inputs.version }}.zip
           asset_content_type: application/zip
 
-      - name: Upload org.openjdk.jmc-${jmcVersion}-macosx.cocoa.x86_64.tar.gz
+      - name: Upload org.openjdk.jmc-linux.gtk.x86_64.tar.gz
         uses: actions/upload-release-asset@v1
         if: github.event.inputs.release == 'True'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          jmcVersion: 8.1.0-SNAPSHOT
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: target/products/org.openjdk.jmc-${jmcVersion}-macosx.cocoa.x86_64.tar.gz
-          asset_name: org.openjdk.jmc-${jmcVersion}-macosx.cocoa.x86_64.tar.gz
+          asset_path: target/products/org.openjdk.jmc-${{ github.event.inputs.version }}-linux.gtk.x86_64.tar.gz
+          asset_name: org.openjdk.jmc-${{ github.event.inputs.version }}-linux.gtk.x86_64.tar.gz
           asset_content_type: application/zip
 
-      - name: Upload org.openjdk.jmc-${jmcVersion}-win32.win32.x86_64.zip
+      - name: Upload org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
         uses: actions/upload-release-asset@v1
         if: github.event.inputs.release == 'True'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          jmcVersion: 8.1.0-SNAPSHOT
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: target/products/org.openjdk.jmc-${jmcVersion}-win32.win32.x86_64.zip
-          asset_name: org.openjdk.jmc-${jmcVersion}-win32.win32.x86_64.zip
+          asset_path: target/products/org.openjdk.jmc-${{ github.event.inputs.version }}-macosx.cocoa.x86_64.tar.gz
+          asset_name: org.openjdk.jmc-${{ github.event.inputs.version }}-macosx.cocoa.x86_64.tar.gz
+          asset_content_type: application/zip
+
+      - name: Upload  org.openjdk.jmc-win32.win32.x86_64.zip
+        uses: actions/upload-release-asset@v1
+        if: github.event.inputs.release == 'True'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: target/products/org.openjdk.jmc-${{ github.event.inputs.version }}-win32.win32.x86_64.zip
+          asset_name: org.openjdk.jmc-${{ github.event.inputs.version }}-win32.win32.x86_64.zip
           asset_content_type: application/zip
