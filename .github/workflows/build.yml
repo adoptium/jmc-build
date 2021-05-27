@@ -32,7 +32,7 @@ jobs:
         tag_name: ${{ github.event.inputs.version }}
         release_name: 'Release of ${{ github.event.inputs.version }}'
         draft: true
-        prerelease: false
+        prerelease: ${{ endsWith(github.event.inputs.version, '-SNAPSHOT') }}
 
   build:
     if: always()
@@ -83,6 +83,15 @@ jobs:
         run: |
           mvn verify
           mvn install
+        working-directory: agent
+
+      - name: Deploy agent libraries
+        if: github.event.inputs.release == 'True'
+        run: |
+          mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs -Dsnapshot.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
         working-directory: agent
 
       - name: Build
