@@ -129,20 +129,20 @@ jobs:
         with:
           name: jmc
           path: |
-            agent/target/org.openjdk.jmc.agent-*.jar
+            agent/target/agent-*.jar
             target/products/*.tar.gz
             target/products/*.zip
             application/org.openjdk.jmc.updatesite.ide/target/*.zip
 
-      - name: Upload org.openjdk.jmc.agent-${{ github.event.inputs.agentVersion }}.jar
+      - name: Upload agent-${{ github.event.inputs.agentVersion }}.jar
         uses: actions/upload-release-asset@v1
         if: github.event.inputs.release == 'True'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: agent/target/org.openjdk.jmc.agent-${{ github.event.inputs.agentVersion }}.jar
-          asset_name: org.openjdk.jmc.agent-${{ github.event.inputs.agentVersion }}.jar
+          asset_path: agent/target/agent-${{ github.event.inputs.agentVersion }}.jar
+          asset_name: agent-${{ github.event.inputs.agentVersion }}.jar
           asset_content_type: application/zip
 
       - name: Upload 	org.openjdk.jmc.updatesite.ide-${{ github.event.inputs.version }}.zip
