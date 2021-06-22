@@ -1,9 +1,12 @@
 name: Build
 on:
+  schedule:
+    - cron: '0 18 * * *'
+
   workflow_dispatch:
     inputs:
         release:
-          description: 'Set to True if are running a release'     
+          description: 'Set to True if are running a release'
           required: true
           default: 'False'
         version:
@@ -18,21 +21,16 @@ on:
 jobs:
   release:
     if: github.event.inputs.release == 'True'
-    name: Create Draft release
+    name: Update release
     runs-on: ubuntu-latest
     outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      release: ${{ github.event.inputs.release || 'True' }}
+      releaseTag: ${{ github.event.inputs.version || '8.1.0-SNAPSHOT' }}
+      version: ${{ github.event.inputs.version || '8.1.0-SNAPSHOT' }}
+      agentVersion: ${{ github.event.inputs.releaseTag || '1.0.1-SNAPSHOT' }}
     steps:
-    - name: Create Draft Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.event.inputs.version }}
-        release_name: 'Release of ${{ github.event.inputs.version }}'
-        draft: true
-        prerelease: ${{ endsWith(github.event.inputs.version, '-SNAPSHOT') }}
+      - name: info
+        run: echo Initialize outputs...
 
   build:
     if: always()
@@ -45,6 +43,9 @@ jobs:
         with:
           repository: openjdk/jmc
           ref: master
+
+      - name: Create release.txt
+        run: git rev-parse HEAD > release.txt
 
       - name: Checkout JMC Overrides
         uses: actions/checkout@v2
@@ -71,7 +72,7 @@ jobs:
         working-directory: core
 
       - name: Deploy core libraries
-        if: github.event.inputs.release == 'True'
+        if: needs.release.outputs.release == 'True'
         run: |
           mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs -Dsnapshot.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
         env:
@@ -86,7 +87,7 @@ jobs:
         working-directory: agent
 
       - name: Deploy agent libraries
-        if: github.event.inputs.release == 'True'
+        if: needs.release.outputs.release == 'True'
         run: |
           mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs -Dsnapshot.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
         env:
@@ -116,7 +117,7 @@ jobs:
           run: mvn verify -P uitests
 
       - name: Deploy update sites
-        if: github.event.inputs.release == 'True'
+        if: needs.release.outputs.release == 'True'
         run: |
           curl -X DELETE -u "$USERNAME:$PASSWORD" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide
           find . -type f -exec curl -o /dev/null -s -u "$USERNAME:$PASSWORD" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/\'{}\' \;
@@ -134,57 +135,74 @@ jobs:
             target/products/*.zip
             application/org.openjdk.jmc.updatesite.ide/target/*.zip
 
-      - name: Upload agent-${{ github.event.inputs.agentVersion }}.jar
-        uses: actions/upload-release-asset@v1
-        if: github.event.inputs.release == 'True'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: needs.release.outputs.release == 'True' && endsWith(needs.release.outputs.version, '-SNAPSHOT')
+        name: Delete old linux assets from ${{ needs.release.outputs.releaseTag }}
+        uses: mknejp/delete-release-assets@v1
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: agent/target/agent-${{ github.event.inputs.agentVersion }}.jar
-          asset_name: agent-${{ github.event.inputs.agentVersion }}.jar
-          asset_content_type: application/zip
+          token: ${{ github.token }}
+          tag: ${{ needs.release.outputs.releaseTag }}
+          assets: |
+            release*
+            ${{ needs.release.outputs.version }}*
+          fail-if-no-assets: false
+          fail-if-no-release: false
 
-      - name: Upload 	org.openjdk.jmc.updatesite.ide-${{ github.event.inputs.version }}.zip
-        uses: actions/upload-release-asset@v1
-        if: github.event.inputs.release == 'True'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: needs.release.outputs.release == 'True'
+        name: Upload release-${{ needs.release.outputs.agentVersion }}.txt
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: application/org.openjdk.jmc.updatesite.ide/target/org.openjdk.jmc.updatesite.ide-${{ github.event.inputs.version }}.zip
-          asset_name: org.openjdk.jmc.updatesite.ide-${{ github.event.inputs.version }}.zip
-          asset_content_type: application/zip
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.release.outputs.releaseTag }}
+          file: release.txt
+          asset_name: release-${{ needs.release.outputs.version }}.txt
+          overwrite: true
 
-      - name: Upload org.openjdk.jmc-linux.gtk.x86_64.tar.gz
-        uses: actions/upload-release-asset@v1
-        if: github.event.inputs.release == 'True'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: needs.release.outputs.release == 'True'
+        name: Upload agent-${{ needs.release.outputs.agentVersion }}.jar
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: target/products/org.openjdk.jmc-linux.gtk.x86_64.tar.gz
-          asset_name: org.openjdk.jmc-${{ github.event.inputs.version }}-linux.gtk.x86_64.tar.gz
-          asset_content_type: application/zip
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.release.outputs.releaseTag }}
+          file: agent/target/agent-${{ needs.release.outputs.agentVersion }}.jar
+          asset_name: agent-${{ needs.release.outputs.agentVersion }}.jar
+          overwrite: true
 
-      - name: Upload org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
-        uses: actions/upload-release-asset@v1
-        if: github.event.inputs.release == 'True'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: needs.release.outputs.release == 'True'
+        name: Upload 	org.openjdk.jmc.updatesite.ide-${{ needs.release.outputs.version }}.zip
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: target/products/org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
-          asset_name: org.openjdk.jmc-${{ github.event.inputs.version }}-macosx.cocoa.x86_64.tar.gz
-          asset_content_type: application/zip
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.release.outputs.releaseTag }}
+          file: application/org.openjdk.jmc.updatesite.ide/target/org.openjdk.jmc.updatesite.ide-${{ needs.release.outputs.version }}.zip
+          asset_name: org.openjdk.jmc.updatesite.ide-${{ needs.release.outputs.version }}.zip
+          overwrite: true
 
-      - name: Upload org.openjdk.jmc-win32.win32.x86_64.zip
-        uses: actions/upload-release-asset@v1
-        if: github.event.inputs.release == 'True'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: needs.release.outputs.release == 'True'
+        name: Upload org.openjdk.jmc-linux.gtk.x86_64.tar.gz
+        uses: svenstaro/upload-release-action@v2
         with:
-          upload_url: ${{ needs.release.outputs.upload_url }}
-          asset_path: target/products/org.openjdk.jmc-win32.win32.x86_64.zip
-          asset_name: org.openjdk.jmc-${{ github.event.inputs.version }}-win32.win32.x86_64.zip
-          asset_content_type: application/zip
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.release.outputs.releaseTag }}
+          file: target/products/org.openjdk.jmc-linux.gtk.x86_64.tar.gz
+          asset_name: org.openjdk.jmc-${{ needs.release.outputs.version }}-linux.gtk.x86_64.tar.gz
+          overwrite: true
+
+      - if: needs.release.outputs.release == 'True'
+        name: Upload org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.release.outputs.releaseTag }}
+          file: target/products/org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
+          asset_name: org.openjdk.jmc-${{ needs.release.outputs.version }}-macosx.cocoa.x86_64.tar.gz
+          overwrite: true
+
+      - if: needs.release.outputs.release == 'True'
+        name: Upload org.openjdk.jmc-win32.win32.x86_64.zip
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.release.outputs.releaseTag }}
+          file: target/products/org.openjdk.jmc-win32.win32.x86_64.zip
+          asset_name: org.openjdk.jmc-${{ needs.release.outputs.version }}-win32.win32.x86_64.zip
+          overwrite: true
