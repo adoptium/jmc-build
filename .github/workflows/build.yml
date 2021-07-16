@@ -20,7 +20,6 @@ on:
 
 jobs:
   release:
-    if: github.event.inputs.release == 'True'
     name: Update release
     runs-on: ubuntu-latest
     outputs:
