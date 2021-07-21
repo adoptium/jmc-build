@@ -101,6 +101,8 @@ jobs:
           mvn jetty:run &
           cd ../../
           mvn package
+        env:
+          MAVEN_OPTS: -Xmx2048m -Declipse.p2.mirrors=false
         working-directory: releng/third-party
 
       - name: Run Unit Tests
