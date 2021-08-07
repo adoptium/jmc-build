@@ -1,9 +1,9 @@
 node('x64&&linux&&build') {
   try {
     def overridesUrl = 'https://github.com/AdoptOpenJDK/openjdk-jmc-overrides.git'
-    def overridesBranch = 'master'
-    def jmcBranch = 'master'
-    def jmcVersion = '8.1.0-SNAPSHOT'
+    def overridesBranch = '8.x.x'
+    def jmcBranch = '8.0.0-ga'
+    def jmcVersion = '8.0.0'
     stage('Preparation') {
       properties([
         buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')),
@@ -64,6 +64,12 @@ node('x64&&linux&&build') {
     }
     // apply overrides
     sh 'cp workspace/overrides/* . -rvf'
+    // change to final version
+    sh 'find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"8.0.0-SNAPSHOT"/"8.0.0"/ {} \\;'
+    sh 'find . ! -path "*/.git/**" -type f \\( -name "feature.xml" -o -name "MANIFEST.MF" \\) -exec sed -i s/"8.0.0.qualifier"/"8.0.0"/ {} \\;'
+    // change to final version
+    sh 'find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"1.0.0-SNAPSHOT"/"1.0.0"/ {} \\;'
+    sh 'find . ! -path "*/.git/**" -type f \\( -name "feature.xml" -o -name "MANIFEST.MF" \\) -exec sed -i s/"1.0.0.qualifier"/"1.0.0"/ {} \\;'
     // start build process
     withEnv(["JAVA_HOME=${tool 'JDK11'}", "PATH=$PATH:${tool 'apache-maven-3.5.3'}/bin"]) {
       // print some info about used JDK & Maven
