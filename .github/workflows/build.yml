@@ -9,10 +9,14 @@ on:
           description: 'Set to True if are running a release'
           required: true
           default: 'False'
-        version:
-          description: 'If running a release, set the version e.g (8.1.0-SNAPSHOT)'
+        checkoutRef:
+          description: 'JMC Checkout reference'
           required: true
-          default: '8.1.0-SNAPSHOT'
+          default: 'master'
+        version:
+          description: 'If running a release, set the version e.g (8.2.0-SNAPSHOT)'
+          required: true
+          default: '8.2.0-SNAPSHOT'
         agentVersion:
           description: 'If running a release, set the agent version e.g (1.0.1-SNAPSHOT)'
           required: true
@@ -24,8 +28,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release: ${{ github.event.inputs.release || 'True' }}
-      releaseTag: ${{ github.event.inputs.version || '8.1.0-SNAPSHOT' }}
-      version: ${{ github.event.inputs.version || '8.1.0-SNAPSHOT' }}
+      releaseTag: ${{ github.event.inputs.version || '8.2.0-SNAPSHOT' }}
+      checkoutRef: ${{ github.event.inputs.checkoutRef || 'master' }}
+      version: ${{ github.event.inputs.version || '8.2.0-SNAPSHOT' }}
       agentVersion: ${{ github.event.inputs.releaseTag || '1.0.1-SNAPSHOT' }}
     steps:
       - name: info
@@ -41,7 +46,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: openjdk/jmc
-          ref: master
+          ref: ${{ needs.release.outputs.checkoutRef }}
 
       - name: Create release.txt
         run: git rev-parse HEAD > release.txt
@@ -58,6 +63,14 @@ jobs:
 
       - name: Apply overrides
         run: cp workspace/overrides/* . -rvf
+
+      - name: Change to final version
+        if: ${{ ! endsWith(needs.release.outputs.version, '-SNAPSHOT') }}
+        run: |
+          find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"${{ needs.release.outputs.version }}-SNAPSHOT"/"${{ needs.release.outputs.version }}"/ {} \;
+          find . ! -path "*/.git/**" -type f \( -name "feature.xml" -o -name "MANIFEST.MF" \) -exec sed -i s/"${{ needs.release.outputs.version }}.qualifier"/"${{ needs.release.outputs.version }}"/ {} \;
+          find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"${{ needs.release.outputs.agentVersion }}-SNAPSHOT"/"${{ needs.release.outputs.agentVersion }}"/ {} \;
+          find . ! -path "*/.git/**" -type f \( -name "feature.xml" -o -name "MANIFEST.MF" \) -exec sed -i s/"${{ needs.release.outputs.agentVersion }}.qualifier"/"${{ needs.release.outputs.agentVersion }}"/ {} \;
 
       - name: Set up JDK 11
         uses: actions/setup-java@v1
