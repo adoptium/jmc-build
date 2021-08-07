@@ -1,7 +1,7 @@
 name: Build
 on:
-  schedule:
-    - cron: '0 18 * * *'
+//  schedule:
+//    - cron: '0 18 * * *'
 
   workflow_dispatch:
     inputs:
@@ -9,6 +9,10 @@ on:
           description: 'Set to True if are running a release'
           required: true
           default: 'False'
+        checkoutRef
+          description: 'JMC Checkout reference'
+          required: true
+          default: 'jmc8'
         version:
           description: 'If running a release, set the version e.g (8.1.0-SNAPSHOT)'
           required: true
@@ -25,6 +29,7 @@ jobs:
     outputs:
       release: ${{ github.event.inputs.release || 'True' }}
       releaseTag: ${{ github.event.inputs.version || '8.1.0-SNAPSHOT' }}
+      checkoutRef: ${{ github.event.inputs.checkoutRef || 'jmc8' }}
       version: ${{ github.event.inputs.version || '8.1.0-SNAPSHOT' }}
       agentVersion: ${{ github.event.inputs.releaseTag || '1.0.1-SNAPSHOT' }}
     steps:
@@ -41,7 +46,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: openjdk/jmc
-          ref: master
+          ref: ${{ needs.release.outputs.checkoutRef }}
 
       - name: Create release.txt
         run: git rev-parse HEAD > release.txt
