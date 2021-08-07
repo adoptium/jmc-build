@@ -9,6 +9,10 @@ on:
           description: 'Set to True if are running a release'
           required: true
           default: 'False'
+        releaseTag:
+          description: 'Set the release tag'
+          required: true
+          default: '8.2.0-SNAPSHOT'
         checkoutRef:
           description: 'JMC Checkout reference'
           required: true
@@ -28,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release: ${{ github.event.inputs.release || 'True' }}
-      releaseTag: ${{ github.event.inputs.version || '8.2.0-SNAPSHOT' }}
+      releaseTag: ${{ github.event.inputs.releaseTag || '8.2.0-SNAPSHOT' }}
       checkoutRef: ${{ github.event.inputs.checkoutRef || 'master' }}
       version: ${{ github.event.inputs.version || '8.2.0-SNAPSHOT' }}
       agentVersion: ${{ github.event.inputs.releaseTag || '1.0.1-SNAPSHOT' }}
