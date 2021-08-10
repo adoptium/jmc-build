@@ -9,6 +9,10 @@ on:
           description: 'Set to True if are running a release'
           required: true
           default: 'False'
+        releaseTag:
+          description: 'Set the release tag'
+          required: true
+          default: '8.1.0-SNAPSHOT'
         checkoutRef:
           description: 'JMC Checkout reference'
           required: true
@@ -28,10 +32,10 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release: ${{ github.event.inputs.release || 'True' }}
-      releaseTag: ${{ github.event.inputs.version || '8.1.0-SNAPSHOT' }}
+      releaseTag: ${{ github.event.inputs.releaseTag || '8.1.0-SNAPSHOT' }}
       checkoutRef: ${{ github.event.inputs.checkoutRef || 'jmc8' }}
       version: ${{ github.event.inputs.version || '8.1.0-SNAPSHOT' }}
-      agentVersion: ${{ github.event.inputs.releaseTag || '1.0.1-SNAPSHOT' }}
+      agentVersion: ${{ github.event.inputs.agentVersion || '1.0.1-SNAPSHOT' }}
     steps:
       - name: info
         run: echo Initialize outputs...
@@ -41,6 +45,8 @@ jobs:
     needs: release
     name: Build
     runs-on: ubuntu-latest
+    env:
+      MAVEN_OPTS: -Xmx2048m -Declipse.p2.mirrors=false
     steps:
       - name: Checkout JMC
         uses: actions/checkout@v2
@@ -69,8 +75,7 @@ jobs:
         run: |
           find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"${{ needs.release.outputs.version }}-SNAPSHOT"/"${{ needs.release.outputs.version }}"/ {} \;
           find . ! -path "*/.git/**" -type f \( -name "feature.xml" -o -name "MANIFEST.MF" \) -exec sed -i s/"${{ needs.release.outputs.version }}.qualifier"/"${{ needs.release.outputs.version }}"/ {} \;
-          find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"${{ needs.release.outputs.agentVersion }}-SNAPSHOT"/"${{ needs.release.outputs.agentVersion }}"/ {} \;
-          find . ! -path "*/.git/**" -type f \( -name "feature.xml" -o -name "MANIFEST.MF" \) -exec sed -i s/"${{ needs.release.outputs.agentVersion }}.qualifier"/"${{ needs.release.outputs.agentVersion }}"/ {} \;
+          echo "MAVEN_OPTS=$MAVEN_OPTS -DskipNexusStagingDeployMojo=true -Dchangelist=" >> $GITHUB_ENV
 
       - name: Set up JDK 11
         uses: actions/setup-java@v1
@@ -114,8 +119,6 @@ jobs:
           mvn jetty:run &
           cd ../../
           mvn package
-        env:
-          MAVEN_OPTS: -Xmx2048m -Declipse.p2.mirrors=false
         working-directory: releng/third-party
 
       - name: Run Unit Tests
@@ -140,16 +143,7 @@ jobs:
           PASSWORD: ${{ secrets.PASSWORD }}
         working-directory: application/org.openjdk.jmc.updatesite.ide/target/repository
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: jmc
-          path: |
-            agent/target/agent-*.jar
-            target/products/*.tar.gz
-            target/products/*.zip
-            application/org.openjdk.jmc.updatesite.ide/target/*.zip
-
-      - if: needs.release.outputs.release == 'True' && endsWith(needs.release.outputs.version, '-SNAPSHOT')
+      - if: needs.release.outputs.release == 'True'
         name: Delete old linux assets from ${{ needs.release.outputs.releaseTag }}
         uses: mknejp/delete-release-assets@v1
         with:
@@ -157,7 +151,9 @@ jobs:
           tag: ${{ needs.release.outputs.releaseTag }}
           assets: |
             release*
-            ${{ needs.release.outputs.version }}*
+            agent-*
+            org.openjdk.jmc.updatesite.ide-*
+            org.openjdk.jmc-*.x86_64.*
           fail-if-no-assets: false
           fail-if-no-release: false
 
@@ -182,7 +178,7 @@ jobs:
           overwrite: true
 
       - if: needs.release.outputs.release == 'True'
-        name: Upload 	org.openjdk.jmc.updatesite.ide-${{ needs.release.outputs.version }}.zip
+        name: Upload org.openjdk.jmc.updatesite.ide-${{ needs.release.outputs.version }}.zip
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
