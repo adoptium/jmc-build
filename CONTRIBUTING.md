@@ -1,4 +1,4 @@
-# Contributing to jmc-overrides
+# Contributing to jmc-build
 
 Thanks for your interest in this project.
 
@@ -6,13 +6,13 @@ Thanks for your interest in this project.
 
 jmc-overrides is a project that contains the Adoptium specific source code overrides and build pipeline script for the Java Mission Control project.
 
-* https://github.com/adoptium/jmc-overrides
+* https://github.com/adoptium/jmc-build
 
 ## Developer resources
 
 The project maintains the following source code repositories
 
-* https://github.com/adoptium/jmc-overrides
+* https://github.com/adoptium/jmc-build
 
 ## Eclipse Contributor Agreement
 
