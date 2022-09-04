@@ -1,4 +1,4 @@
-# JMC Overrides
+# JMC Build
 This repository contains build scripts and file overrides required to build
 the OpenJDK Mission Control on AdoptOpenJDK. The overrides consist of the main
 `Jenkinsfile` that controls the actual build process as basically described within

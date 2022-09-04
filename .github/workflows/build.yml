@@ -12,15 +12,15 @@ on:
         releaseTag:
           description: 'Set the release tag'
           required: true
-          default: '8.2.0-SNAPSHOT'
+          default: '8.3.0-SNAPSHOT'
         checkoutRef:
           description: 'JMC Checkout reference'
           required: true
           default: 'master'
         version:
-          description: 'If running a release, set the version e.g (8.2.0-SNAPSHOT)'
+          description: 'If running a release, set the version e.g (8.3.0-SNAPSHOT)'
           required: true
-          default: '8.2.0-SNAPSHOT'
+          default: '8.3.0-SNAPSHOT'
         agentVersion:
           description: 'If running a release, set the agent version e.g (1.0.1-SNAPSHOT)'
           required: true
@@ -32,9 +32,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release: ${{ github.event.inputs.release || 'True' }}
-      releaseTag: ${{ github.event.inputs.releaseTag || '8.2.0-SNAPSHOT' }}
+      releaseTag: ${{ github.event.inputs.releaseTag || '8.3.0-SNAPSHOT' }}
       checkoutRef: ${{ github.event.inputs.checkoutRef || 'master' }}
-      version: ${{ github.event.inputs.version || '8.2.0-SNAPSHOT' }}
+      version: ${{ github.event.inputs.version || '8.3.0-SNAPSHOT' }}
       agentVersion: ${{ github.event.inputs.agentVersion || '1.0.1-SNAPSHOT' }}
     steps:
       - name: info
@@ -205,6 +205,16 @@ jobs:
           tag: ${{ needs.release.outputs.releaseTag }}
           file: target/products/org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
           asset_name: org.openjdk.jmc-${{ needs.release.outputs.version }}-macosx.cocoa.x86_64.tar.gz
+          overwrite: true
+
+      - if: needs.release.outputs.release == 'True'
+        name: Upload org.openjdk.jmc-macosx.cocoa.aarch64.tar.gz
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.release.outputs.releaseTag }}
+          file: target/products/org.openjdk.jmc-macosx.cocoa.aarch64.tar.gz
+          asset_name: org.openjdk.jmc-${{ needs.release.outputs.version }}-macosx.cocoa.aarch64.tar.gz
           overwrite: true
 
       - if: needs.release.outputs.release == 'True'
