@@ -12,15 +12,15 @@ on:
         releaseTag:
           description: 'Set the release tag'
           required: true
-          default: '8.3.0-SNAPSHOT'
+          default: '9.0.0-SNAPSHOT'
         checkoutRef:
           description: 'JMC Checkout reference'
           required: true
           default: 'master'
         version:
-          description: 'If running a release, set the version e.g (8.3.0-SNAPSHOT)'
+          description: 'If running a release, set the version e.g (9.0.0-SNAPSHOT)'
           required: true
-          default: '8.3.0-SNAPSHOT'
+          default: '9.0.0-SNAPSHOT'
         agentVersion:
           description: 'If running a release, set the agent version e.g (1.0.1-SNAPSHOT)'
           required: true
@@ -49,7 +49,7 @@ jobs:
       MAVEN_OPTS: -Xmx2048m -Declipse.p2.mirrors=false
     steps:
       - name: Checkout JMC
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.1.0
         with:
           repository: openjdk/jmc
           ref: ${{ needs.release.outputs.checkoutRef }}
@@ -58,7 +58,7 @@ jobs:
         run: git rev-parse HEAD > release.txt
 
       - name: Checkout JMC Overrides
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.1.0
         with:
           path: workspace
 
@@ -78,9 +78,10 @@ jobs:
           echo "MAVEN_OPTS=$MAVEN_OPTS -DskipNexusStagingDeployMojo=true -Dchangelist=" >> $GITHUB_ENV
 
       - name: Set up JDK 11
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3.6.0
         with:
           java-version: 11
+          distribution: temurin
 
       - name: Build & test core libraries
         run: |
