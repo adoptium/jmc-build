@@ -32,9 +32,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release: ${{ github.event.inputs.release || 'True' }}
-      releaseTag: ${{ github.event.inputs.releaseTag || '8.3.0-SNAPSHOT' }}
+      releaseTag: ${{ github.event.inputs.releaseTag || '9.0.0-SNAPSHOT' }}
       checkoutRef: ${{ github.event.inputs.checkoutRef || 'master' }}
-      version: ${{ github.event.inputs.version || '8.3.0-SNAPSHOT' }}
+      version: ${{ github.event.inputs.version || '9.0.0-SNAPSHOT' }}
       agentVersion: ${{ github.event.inputs.agentVersion || '1.0.1-SNAPSHOT' }}
     steps:
       - name: info
