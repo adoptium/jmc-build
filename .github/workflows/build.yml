@@ -92,10 +92,10 @@ jobs:
       - name: Deploy core libraries
         if: needs.release.outputs.release == 'True'
         run: |
-          mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs -Dsnapshot.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
+          mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://packages.adoptium.net/artifactory/jmc-libs -Dsnapshot.repo=https://packages.adoptium.net/artifactory/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
         env:
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
+          USERNAME: ${{ secrets.ARTIFACTORY_USER }}
+          PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         working-directory: core
 
       - name: Build & test agent
@@ -107,10 +107,10 @@ jobs:
       - name: Deploy agent libraries
         if: needs.release.outputs.release == 'True'
         run: |
-          mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs -Dsnapshot.repo=https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
+          mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://packages.adoptium.net/artifactory/jmc-libs -Dsnapshot.repo=https://packages.adoptium.net/artifactory/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
         env:
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
+          USERNAME: ${{ secrets.ARTIFACTORY_USER }}
+          PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         working-directory: agent
 
       - name: Build
@@ -138,10 +138,10 @@ jobs:
         if: needs.release.outputs.release == 'True'
         run: |
           curl -X DELETE -u "$USERNAME:$PASSWORD" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide
-          find . -type f -exec curl -o /dev/null -s -u "$USERNAME:$PASSWORD" -T \'{}\' https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide/\'{}\' \;
+          find . -type f -exec curl -o /dev/null -s -u "$USERNAME:$PASSWORD" -T \'{}\' https://packages.adoptium.net/artifactory/jmc-snapshots/ide/\'{}\' \;
         env:
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
+          USERNAME: ${{ secrets.ARTIFACTORY_USER }}
+          PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         working-directory: application/org.openjdk.jmc.updatesite.ide/target/repository
 
       - if: needs.release.outputs.release == 'True'
