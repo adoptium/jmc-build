@@ -199,6 +199,16 @@ jobs:
           overwrite: true
 
       - if: needs.release.outputs.release == 'True'
+        name: Upload org.openjdk.jmc-linux.gtk.aarch64.tar.gz
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ needs.release.outputs.releaseTag }}
+          file: target/products/org.openjdk.jmc-linux.gtk.aarch64.tar.gz
+          asset_name: org.openjdk.jmc-${{ needs.release.outputs.version }}-linux.gtk.aarch64.tar.gz
+          overwrite: true
+
+      - if: needs.release.outputs.release == 'True'
         name: Upload org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
         uses: svenstaro/upload-release-action@v2
         with:
