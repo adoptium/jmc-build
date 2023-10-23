@@ -1,4 +1,4 @@
-def overridesUrl = 'https://github.com/AdoptOpenJDK/openjdk-jmc-overrides.git'
+def overridesUrl = 'https://github.com/adoptium/jmc-build.git'
 def overridesBranch = 'master'
 def jmcBranch = 'master'
 def jmcVersion = '9.0.0-SNAPSHOT'
