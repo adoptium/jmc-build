@@ -1,40 +1,40 @@
 <settings>
     <profiles>
-    <profile>
-        <id>jmc</id>
-        <repositories>
-        <repository>
-            <id>jmc-publish</id>
-            <snapshots>
-            <enabled>false</enabled>
-            </snapshots>
-            <url>https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs</url>
-            <layout>default</layout>
-        </repository>
-        <repository>
-            <id>jmc-publish-snapshot</id>
-            <releases>
-            <enabled>false</enabled>
-            </releases>
-            <url>https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots</url>
-            <layout>default</layout>
-        </repository>
-        </repositories>
-    </profile>
+        <profile>
+            <id>jmc</id>
+            <repositories>
+                <repository>
+                    <id>jmc-publish</id>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <url>https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs</url>
+                    <layout>default</layout>
+                </repository>
+                <repository>
+                    <id>jmc-publish-snapshot</id>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                    <url>https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-libs-snapshots</url>
+                    <layout>default</layout>
+                </repository>
+            </repositories>
+        </profile>
     </profiles>
     <servers>
-    <server>
-        <id>jmc-publish</id>
-        <username>${publish.user}</username>
-        <password>${publish.password}</password>
-    </server>
-    <server>
-        <id>jmc-publish-snapshot</id>
-        <username>${publish.user}</username>
-        <password>${publish.password}</password>
-    </server>
+        <server>
+            <id>jmc-publish</id>
+            <username>${publish.user}</username>
+            <password>${publish.password}</password>
+        </server>
+        <server>
+            <id>jmc-publish-snapshot</id>
+            <username>${publish.user}</username>
+            <password>${publish.password}</password>
+        </server>
     </servers>
     <activeProfiles>
-    <activeProfile>jmc</activeProfile>
+        <activeProfile>jmc</activeProfile>
     </activeProfiles>
 </settings>
