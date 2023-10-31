@@ -93,7 +93,7 @@ jobs:
       - name: Deploy core libraries
         if: needs.release.outputs.release == 'True'
         run: |
-          mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://packages.adoptium.net/artifactory/jmc-libs -Dsnapshot.repo=https://packages.adoptium.net/artifactory/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
+          mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptium.jfrog.io/artifactory/jmc-libs -Dsnapshot.repo=https://adoptium.jfrog.io/artifactory/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
         env:
           USERNAME: ${{ secrets.ARTIFACTORY_USER }}
           PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
@@ -108,7 +108,7 @@ jobs:
       - name: Deploy agent libraries
         if: needs.release.outputs.release == 'True'
         run: |
-          mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://packages.adoptium.net/artifactory/jmc-libs -Dsnapshot.repo=https://packages.adoptium.net/artifactory/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
+          mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptium.jfrog.io/artifactory/jmc-libs -Dsnapshot.repo=https://adoptium.jfrog.io/artifactory/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
         env:
           USERNAME: ${{ secrets.ARTIFACTORY_USER }}
           PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
@@ -138,8 +138,8 @@ jobs:
       - name: Deploy update sites
         if: needs.release.outputs.release == 'True'
         run: |
-          curl -X DELETE -u "$USERNAME:$PASSWORD" https://packages.adoptium.net/artifactory/jmc-snapshots/ide
-          find . -type f -exec curl -o /dev/null -s -u "$USERNAME:$PASSWORD" -T \'{}\' https://packages.adoptium.net/artifactory/jmc-snapshots/ide/\'{}\' \;
+          curl -X DELETE -u "$USERNAME:$PASSWORD" https://adoptium.jfrog.io/artifactory/jmc-snapshots/ide
+          find . -type f -exec curl -o /dev/null -s -u "$USERNAME:$PASSWORD" -T \'{}\' https://adoptium.jfrog.io/artifactory/jmc-snapshots/ide/\'{}\' \;
         env:
           USERNAME: ${{ secrets.ARTIFACTORY_USER }}
           PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}

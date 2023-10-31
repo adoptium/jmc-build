@@ -8,7 +8,7 @@
                     <snapshots>
                         <enabled>false</enabled>
                     </snapshots>
-                    <url>https://packages.adoptium.net/artifactory/jmc-libs</url>
+                    <url>https://adoptium.jfrog.io/artifactory/jmc-libs</url>
                     <layout>default</layout>
                 </repository>
                 <repository>
@@ -16,7 +16,7 @@
                     <releases>
                         <enabled>false</enabled>
                     </releases>
-                    <url>https://packages.adoptium.net/artifactory/jmc-libs-snapshots</url>
+                    <url>https://adoptium.jfrog.io/artifactory/jmc-libs-snapshots</url>
                     <layout>default</layout>
                 </repository>
             </repositories>
