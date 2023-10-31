@@ -49,7 +49,7 @@ jobs:
       MAVEN_OPTS: -Xmx2048m -Declipse.p2.mirrors=false
     steps:
       - name: Checkout JMC
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           repository: openjdk/jmc
           ref: ${{ needs.release.outputs.checkoutRef }}
@@ -58,7 +58,7 @@ jobs:
         run: git rev-parse HEAD > release.txt
 
       - name: Checkout JMC Overrides
-        uses: actions/checkout@v3.1.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           path: workspace
 
@@ -76,11 +76,13 @@ jobs:
           find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"${{ needs.release.outputs.version }}-SNAPSHOT"/"${{ needs.release.outputs.version }}"/ {} \;
           find . ! -path "*/.git/**" -type f \( -name "feature.xml" -o -name "MANIFEST.MF" \) -exec sed -i s/"${{ needs.release.outputs.version }}.qualifier"/"${{ needs.release.outputs.version }}"/ {} \;
           echo "MAVEN_OPTS=$MAVEN_OPTS -DskipNexusStagingDeployMojo=true -Dchangelist=" >> $GITHUB_ENV
+
       - name: Set up JDK 17
-        uses: actions/setup-java@v3.6.0
+        uses: actions/setup-java@0ab4596768b603586c0de567f2430c30f5b0d2b0 # v3.13.0
         with:
           java-version: 17
           distribution: temurin
+          cache: 'maven'
 
       - name: Build & test core libraries
         run: |
@@ -122,21 +124,21 @@ jobs:
         working-directory: releng/third-party
 
       - name: Run Unit Tests
-        uses: GabrielBB/xvfb-action@v1
+        uses: GabrielBB/xvfb-action@86d97bde4a65fe9b290c0b3fb92c2c4ed0e5302d # v1.6
         with:
           run: mvn verify
 
       - name: Run UI Tests
         # Ignore UI failures for now
         continue-on-error: true
-        uses: GabrielBB/xvfb-action@v1
+        uses: GabrielBB/xvfb-action@86d97bde4a65fe9b290c0b3fb92c2c4ed0e5302d # v1.6
         with:
           run: mvn verify -P uitests
 
       - name: Deploy update sites
         if: needs.release.outputs.release == 'True'
         run: |
-          curl -X DELETE -u "$USERNAME:$PASSWORD" https://adoptopenjdk.jfrog.io/adoptopenjdk/jmc-snapshots/ide
+          curl -X DELETE -u "$USERNAME:$PASSWORD" https://packages.adoptium.net/artifactory/jmc-snapshots/ide
           find . -type f -exec curl -o /dev/null -s -u "$USERNAME:$PASSWORD" -T \'{}\' https://packages.adoptium.net/artifactory/jmc-snapshots/ide/\'{}\' \;
         env:
           USERNAME: ${{ secrets.ARTIFACTORY_USER }}
@@ -159,7 +161,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload release-${{ needs.release.outputs.agentVersion }}.txt
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -169,7 +171,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload agent-${{ needs.release.outputs.agentVersion }}.jar
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -179,7 +181,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload 	org.openjdk.jmc.updatesite.ide-${{ needs.release.outputs.version }}.zip
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -189,7 +191,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload org.openjdk.jmc-linux.gtk.x86_64.tar.gz
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -199,7 +201,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload org.openjdk.jmc-linux.gtk.aarch64.tar.gz
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -209,7 +211,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -219,7 +221,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload org.openjdk.jmc-macosx.cocoa.aarch64.tar.gz
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -229,7 +231,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload org.openjdk.jmc-win32.win32.x86_64.zip
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
