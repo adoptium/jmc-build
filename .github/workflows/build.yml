@@ -83,6 +83,7 @@ jobs:
           java-version: 17
           distribution: temurin
           cache: 'maven'
+          mvn-toolchain-id: 'JavaSE-17'
 
       - name: Build & test core libraries
         run: |
