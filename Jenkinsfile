@@ -77,7 +77,7 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     timeout(180) {
-                        xvnc {
+                        wrap([$class: 'Xvfb', autoDisplayName: true, timeout: 10]) {
                             sh 'mvn verify -fae -P uitests'
                         }
                     }
