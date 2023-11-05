@@ -90,6 +90,13 @@ pipeline {
     post {
         always {
             junit '**/target/surefire-reports/TEST-*.xml'
+            dir('target/products') {
+              sh "mv -f org.openjdk.jmc-linux.gtk.aarch64.tar.gz    org.openjdk.jmc-${jmcVersion}-linux.gtk.aarch64.tar.gz"
+              sh "mv -f org.openjdk.jmc-linux.gtk.x86_64.tar.gz     org.openjdk.jmc-${jmcVersion}-linux.gtk.x86_64.tar.gz"
+              sh "mv -f org.openjdk.jmc-macosx.cocoa.aarch64.tar.gz org.openjdk.jmc-${jmcVersion}-macosx.cocoa.aarch64.tar.gz"
+              sh "mv -f org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz  org.openjdk.jmc-${jmcVersion}-macosx.cocoa.x86_64.tar.gz"
+              sh "mv -f org.openjdk.jmc-win32.win32.x86_64.zip      org.openjdk.jmc-${jmcVersion}-win32.win32.x86_64.zip"
+            }
             archiveArtifacts artifacts: 'target/products/org.openjdk.jmc-*', followSymlinks: false
         }
         // send a mail on unsuccessful and fixed builds
