@@ -157,6 +157,7 @@ jobs:
             agent-*
             org.openjdk.jmc.updatesite.ide-*
             org.openjdk.jmc-*.x86_64.*
+            org.openjdk.jmc-*.aarch64.*
           fail-if-no-assets: false
           fail-if-no-release: false
 
