@@ -19,7 +19,7 @@ The build runs thru the following steps:
 - Build of the core libraries first
 - Start of a Jetty P2 site used for the main build part
 - Build IDE and RCP parts
-- Deploy all artifacts to the AdoptOpenJDK Artifactory instance
+- Deploy all artifacts to the Adoptium Artifactory instance
  
 ## Update of overridden files
 The override files will be kept up to date by manually comparing those with the original
