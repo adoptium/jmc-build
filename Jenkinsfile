@@ -17,6 +17,7 @@ pipeline {
     options {
         timestamps()
         disableConcurrentBuilds()
+        pipelineTriggers([cron('H 20 * * *')])
     }
 
     environment {
