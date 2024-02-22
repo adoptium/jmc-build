@@ -163,7 +163,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload release-${{ needs.release.outputs.agentVersion }}.txt
-        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -173,7 +173,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload agent-${{ needs.release.outputs.agentVersion }}.jar
-        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -183,7 +183,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload 	org.openjdk.jmc.updatesite.ide-${{ needs.release.outputs.version }}.zip
-        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -193,7 +193,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload org.openjdk.jmc-linux.gtk.x86_64.tar.gz
-        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -203,7 +203,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload org.openjdk.jmc-linux.gtk.aarch64.tar.gz
-        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -213,7 +213,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
-        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -223,7 +223,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload org.openjdk.jmc-macosx.cocoa.aarch64.tar.gz
-        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -233,7 +233,7 @@ jobs:
 
       - if: needs.release.outputs.release == 'True'
         name: Upload org.openjdk.jmc-win32.win32.x86_64.zip
-        uses: svenstaro/upload-release-action@1beeb572c19a9242f4361f4cee78f8e0d9aec5df # v2.7.0
+        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
