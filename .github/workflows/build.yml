@@ -28,6 +28,8 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: write
     name: Update release
     runs-on: ubuntu-latest
     outputs:
@@ -150,7 +152,7 @@ jobs:
         name: Delete old linux assets from ${{ needs.release.outputs.releaseTag }}
         uses: mknejp/delete-release-assets@v1
         with:
-          token: ${{ github.token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
           assets: |
             release*
