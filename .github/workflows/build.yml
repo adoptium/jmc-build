@@ -16,7 +16,7 @@ on:
         checkoutRef:
           description: 'JMC Checkout reference'
           required: true
-          default: 'master'
+          default: 'main'
         version:
           description: 'If running a release, set the version e.g (9.0.0-SNAPSHOT)'
           required: true
@@ -36,7 +36,7 @@ jobs:
     outputs:
       release: ${{ github.event.inputs.release || 'True' }}
       releaseTag: ${{ github.event.inputs.releaseTag || '9.0.0-SNAPSHOT' }}
-      checkoutRef: ${{ github.event.inputs.checkoutRef || 'master' }}
+      checkoutRef: ${{ github.event.inputs.checkoutRef || 'main' }}
       version: ${{ github.event.inputs.version || '9.0.0-SNAPSHOT' }}
       agentVersion: ${{ github.event.inputs.agentVersion || '1.0.1-SNAPSHOT' }}
     steps:
