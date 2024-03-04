@@ -2,7 +2,6 @@ name: Build
 on:
   schedule:
     - cron: '0 18 * * *'
-
   workflow_dispatch:
     inputs:
         release:
@@ -26,11 +25,12 @@ on:
           required: true
           default: '1.0.1-SNAPSHOT'
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   release:
-    permissions:
-      contents: write
-      packages: write
     name: Update release
     runs-on: ubuntu-latest
     outputs:
