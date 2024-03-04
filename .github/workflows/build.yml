@@ -7,7 +7,8 @@ on:
         release:
           description: 'Set to True if are running a release'
           required: true
-          default: 'False'
+          type: boolean
+          default: false
         releaseTag:
           description: 'Set the release tag'
           required: true
@@ -33,7 +34,7 @@ jobs:
     name: Update release
     runs-on: ubuntu-latest
     outputs:
-      release: ${{ github.event.inputs.release || 'True' }}
+      release: ${{ github.event.inputs.release || true }}
       releaseTag: ${{ github.event.inputs.releaseTag || '9.0.0-SNAPSHOT' }}
       checkoutRef: ${{ github.event.inputs.checkoutRef || 'master' }}
       version: ${{ github.event.inputs.version || '9.0.0-SNAPSHOT' }}
@@ -94,7 +95,7 @@ jobs:
         working-directory: core
 
       - name: Deploy core libraries
-        if: needs.release.outputs.release == 'True'
+        if: needs.release.outputs.release
         run: |
           mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptium.jfrog.io/artifactory/jmc-libs -Dsnapshot.repo=https://adoptium.jfrog.io/artifactory/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
         env:
@@ -109,7 +110,7 @@ jobs:
         working-directory: agent
 
       - name: Deploy agent libraries
-        if: needs.release.outputs.release == 'True'
+        if: needs.release.outputs.release
         run: |
           mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptium.jfrog.io/artifactory/jmc-libs -Dsnapshot.repo=https://adoptium.jfrog.io/artifactory/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
         env:
@@ -127,19 +128,19 @@ jobs:
         working-directory: releng/third-party
 
       - name: Run Unit Tests
-        uses: GabrielBB/xvfb-action@86d97bde4a65fe9b290c0b3fb92c2c4ed0e5302d # v1.6
+        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
         with:
           run: mvn verify
 
       - name: Run UI Tests
         # Ignore UI failures for now
         continue-on-error: true
-        uses: GabrielBB/xvfb-action@86d97bde4a65fe9b290c0b3fb92c2c4ed0e5302d # v1.6
+        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
         with:
           run: mvn verify -P uitests
 
       - name: Deploy update sites
-        if: needs.release.outputs.release == 'True'
+        if: needs.release.outputs.release
         run: |
           curl -X DELETE -u "$USERNAME:$PASSWORD" https://adoptium.jfrog.io/artifactory/jmc-snapshots/ide
           find . -type f -exec curl -o /dev/null -s -u "$USERNAME:$PASSWORD" -T \'{}\' https://adoptium.jfrog.io/artifactory/jmc-snapshots/ide/\'{}\' \;
@@ -148,9 +149,9 @@ jobs:
           PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         working-directory: application/org.openjdk.jmc.updatesite.ide/target/repository
 
-      - if: needs.release.outputs.release == 'True'
+      - if: needs.release.outputs.release
         name: Delete old linux assets from ${{ needs.release.outputs.releaseTag }}
-        uses: mknejp/delete-release-assets@v1
+        uses: mknejp/delete-release-assets@ea7ff12c30ef2589fe4311264f3a336d01325030 # v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ needs.release.outputs.releaseTag }}
@@ -163,82 +164,18 @@ jobs:
           fail-if-no-assets: false
           fail-if-no-release: false
 
-      - if: needs.release.outputs.release == 'True'
-        name: Upload release-${{ needs.release.outputs.agentVersion }}.txt
-        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
+      - name: Release
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v0.1.15
+        if: needs.release.outputs.release
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.release.outputs.releaseTag }}
-          file: release.txt
-          asset_name: release-${{ needs.release.outputs.version }}.txt
-          overwrite: true
-
-      - if: needs.release.outputs.release == 'True'
-        name: Upload agent-${{ needs.release.outputs.agentVersion }}.jar
-        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.release.outputs.releaseTag }}
-          file: agent/target/agent-${{ needs.release.outputs.agentVersion }}.jar
-          asset_name: agent-${{ needs.release.outputs.agentVersion }}.jar
-          overwrite: true
-
-      - if: needs.release.outputs.release == 'True'
-        name: Upload 	org.openjdk.jmc.updatesite.ide-${{ needs.release.outputs.version }}.zip
-        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.release.outputs.releaseTag }}
-          file: application/org.openjdk.jmc.updatesite.ide/target/org.openjdk.jmc.updatesite.ide-${{ needs.release.outputs.version }}.zip
-          asset_name: org.openjdk.jmc.updatesite.ide-${{ needs.release.outputs.version }}.zip
-          overwrite: true
-
-      - if: needs.release.outputs.release == 'True'
-        name: Upload org.openjdk.jmc-linux.gtk.x86_64.tar.gz
-        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.release.outputs.releaseTag }}
-          file: target/products/org.openjdk.jmc-linux.gtk.x86_64.tar.gz
-          asset_name: org.openjdk.jmc-${{ needs.release.outputs.version }}-linux.gtk.x86_64.tar.gz
-          overwrite: true
-
-      - if: needs.release.outputs.release == 'True'
-        name: Upload org.openjdk.jmc-linux.gtk.aarch64.tar.gz
-        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.release.outputs.releaseTag }}
-          file: target/products/org.openjdk.jmc-linux.gtk.aarch64.tar.gz
-          asset_name: org.openjdk.jmc-${{ needs.release.outputs.version }}-linux.gtk.aarch64.tar.gz
-          overwrite: true
-
-      - if: needs.release.outputs.release == 'True'
-        name: Upload org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
-        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.release.outputs.releaseTag }}
-          file: target/products/org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
-          asset_name: org.openjdk.jmc-${{ needs.release.outputs.version }}-macosx.cocoa.x86_64.tar.gz
-          overwrite: true
-
-      - if: needs.release.outputs.release == 'True'
-        name: Upload org.openjdk.jmc-macosx.cocoa.aarch64.tar.gz
-        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.release.outputs.releaseTag }}
-          file: target/products/org.openjdk.jmc-macosx.cocoa.aarch64.tar.gz
-          asset_name: org.openjdk.jmc-${{ needs.release.outputs.version }}-macosx.cocoa.aarch64.tar.gz
-          overwrite: true
-
-      - if: needs.release.outputs.release == 'True'
-        name: Upload org.openjdk.jmc-win32.win32.x86_64.zip
-        uses: svenstaro/upload-release-action@04733e069f2d7f7f0b4aebc4fbdbce8613b03ccd # v2.9.0
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ needs.release.outputs.releaseTag }}
-          file: target/products/org.openjdk.jmc-win32.win32.x86_64.zip
-          asset_name: org.openjdk.jmc-${{ needs.release.outputs.version }}-win32.win32.x86_64.zip
-          overwrite: true
+          files: |
+            release.txt
+            agent/target/agent-${{ needs.release.outputs.agentVersion }}.jar
+            application/org.openjdk.jmc.updatesite.ide/target/org.openjdk.jmc.updatesite.ide-${{ needs.release.outputs.version }}.zip
+            target/products/org.openjdk.jmc-linux.gtk.x86_64.tar.gz
+            target/products/org.openjdk.jmc-linux.gtk.aarch64.tar.gz
+            target/products/org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
+            target/products/org.openjdk.jmc-macosx.cocoa.aarch64.tar.gz
+            target/products/org.openjdk.jmc-win32.win32.x86_64.zip
+          tag_name: ${{ needs.release.outputs.releaseTag }}
+          token: ${{ secrets.GITHUB_TOKEN }}
