@@ -165,7 +165,7 @@ jobs:
           fail-if-no-release: false
 
       - name: Deploy release assets
-        uses: softprops/action-gh-release@3198ee18f814cdf787321b4a32a26ddbf37acc52 # v0.1.15
+        uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564 # v0.1.15
         if: needs.release.outputs.release
         with:
           files: |
