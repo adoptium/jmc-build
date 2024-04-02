@@ -58,7 +58,7 @@ jobs:
           ref: ${{ needs.release.outputs.checkoutRef }}
 
       - name: Create release.txt
-        run: git rev-parse HEAD > release.txt
+        run: git rev-parse HEAD > release-${{ needs.release.outputs.version }}.txt
 
       - name: Checkout JMC Overrides
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
@@ -163,9 +163,6 @@ jobs:
             org.openjdk.jmc-*.aarch64.*
           fail-if-no-assets: false
           fail-if-no-release: false
-
-      - name: Rename release file to contain version
-        run: mv release.txt release-${{ needs.release.outputs.version }}.txt
 
       - name: Rename files to contain version
         working-directory: target/products
