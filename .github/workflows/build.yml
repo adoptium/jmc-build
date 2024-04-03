@@ -58,7 +58,7 @@ jobs:
           ref: ${{ needs.release.outputs.checkoutRef }}
 
       - name: Create release.txt
-        run: git rev-parse HEAD > release.txt
+        run: git rev-parse HEAD > release-${{ needs.release.outputs.version }}.txt
 
       - name: Checkout JMC Overrides
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
@@ -164,18 +164,27 @@ jobs:
           fail-if-no-assets: false
           fail-if-no-release: false
 
+      - name: Rename files to contain version
+        working-directory: target/products
+        run: |
+          mv org.openjdk.jmc-linux.gtk.x86_64.tar.gz org.openjdk.jmc-${{ needs.release.outputs.version }}-linux.gtk.x86_64.tar.gz
+          mv org.openjdk.jmc-linux.gtk.aarch64.tar.gz org.openjdk.jmc-${{ needs.release.outputs.version }}-linux.gtk.aarch64.tar.gz
+          mv org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz org.openjdk.jmc-${{ needs.release.outputs.version }}-macosx.cocoa.x86_64.tar.gz
+          mv org.openjdk.jmc-macosx.cocoa.aarch64.tar.gz org.openjdk.jmc-${{ needs.release.outputs.version }}-macosx.cocoa.aarch64.tar.gz
+          mv org.openjdk.jmc-win32.win32.x86_64.zip org.openjdk.jmc-${{ needs.release.outputs.version }}-win32.win32.x86_64.zip
+
       - name: Deploy release assets
         uses: softprops/action-gh-release@9d7c94cfd0a1f3ed45544c887983e9fa900f0564 # v0.1.15
         if: needs.release.outputs.release
         with:
           files: |
-            release.txt
+            release-${{ needs.release.outputs.version }}.txt
             agent/target/agent-${{ needs.release.outputs.agentVersion }}.jar
             application/org.openjdk.jmc.updatesite.ide/target/org.openjdk.jmc.updatesite.ide-${{ needs.release.outputs.version }}.zip
-            target/products/org.openjdk.jmc-linux.gtk.x86_64.tar.gz
-            target/products/org.openjdk.jmc-linux.gtk.aarch64.tar.gz
-            target/products/org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz
-            target/products/org.openjdk.jmc-macosx.cocoa.aarch64.tar.gz
-            target/products/org.openjdk.jmc-win32.win32.x86_64.zip
+            target/products/org.openjdk.jmc-${{ needs.release.outputs.version }}-linux.gtk.x86_64.tar.gz
+            target/products/org.openjdk.jmc-${{ needs.release.outputs.version }}-linux.gtk.aarch64.tar.gz
+            target/products/org.openjdk.jmc-${{ needs.release.outputs.version }}-macosx.cocoa.x86_64.tar.gz
+            target/products/org.openjdk.jmc-${{ needs.release.outputs.version }}-macosx.cocoa.aarch64.tar.gz
+            target/products/org.openjdk.jmc-${{ needs.release.outputs.version }}-win32.win32.x86_64.zip
           tag_name: ${{ needs.release.outputs.releaseTag }}
           token: ${{ secrets.GITHUB_TOKEN }}
