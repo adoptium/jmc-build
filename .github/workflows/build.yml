@@ -12,15 +12,15 @@ on:
         releaseTag:
           description: 'Set the release tag'
           required: true
-          default: '9.0.0-SNAPSHOT'
+          default: '9.1.0-SNAPSHOT'
         checkoutRef:
           description: 'JMC Checkout reference'
           required: true
           default: 'master'
         version:
-          description: 'If running a release, set the version e.g (9.0.0-SNAPSHOT)'
+          description: 'If running a release, set the version e.g (9.1.0-SNAPSHOT)'
           required: true
-          default: '9.0.0-SNAPSHOT'
+          default: '9.1.0-SNAPSHOT'
         agentVersion:
           description: 'If running a release, set the agent version e.g (1.0.1-SNAPSHOT)'
           required: true
@@ -35,9 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       release: ${{ github.event.inputs.release || true }}
-      releaseTag: ${{ github.event.inputs.releaseTag || '9.0.0-SNAPSHOT' }}
+      releaseTag: ${{ github.event.inputs.releaseTag || '9.1.0-SNAPSHOT' }}
       checkoutRef: ${{ github.event.inputs.checkoutRef || 'master' }}
-      version: ${{ github.event.inputs.version || '9.0.0-SNAPSHOT' }}
+      version: ${{ github.event.inputs.version || '9.1.0-SNAPSHOT' }}
       agentVersion: ${{ github.event.inputs.agentVersion || '1.0.1-SNAPSHOT' }}
     steps:
       - name: info
