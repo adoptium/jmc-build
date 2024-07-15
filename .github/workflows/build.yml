@@ -164,15 +164,6 @@ jobs:
           fail-if-no-assets: false
           fail-if-no-release: false
 
-      - name: Rename files to contain version
-        working-directory: target/products
-        run: |
-          mv org.openjdk.jmc-linux.gtk.x86_64.tar.gz org.openjdk.jmc-${{ needs.release.outputs.version }}-linux.gtk.x86_64.tar.gz
-          mv org.openjdk.jmc-linux.gtk.aarch64.tar.gz org.openjdk.jmc-${{ needs.release.outputs.version }}-linux.gtk.aarch64.tar.gz
-          mv org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz org.openjdk.jmc-${{ needs.release.outputs.version }}-macosx.cocoa.x86_64.tar.gz
-          mv org.openjdk.jmc-macosx.cocoa.aarch64.tar.gz org.openjdk.jmc-${{ needs.release.outputs.version }}-macosx.cocoa.aarch64.tar.gz
-          mv org.openjdk.jmc-win32.win32.x86_64.zip org.openjdk.jmc-${{ needs.release.outputs.version }}-win32.win32.x86_64.zip
-
       - name: Deploy release assets
         uses: softprops/action-gh-release@c062e08bd532815e2082a85e87e3ef29c3e6d191 # v0.1.15
         if: needs.release.outputs.release
