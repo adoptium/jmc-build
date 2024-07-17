@@ -174,7 +174,7 @@ jobs:
           mv org.openjdk.jmc-win32.win32.x86_64.zip org.openjdk.jmc-${{ needs.release.outputs.version }}-win32.win32.x86_64.zip
 
       - name: Deploy release assets
-        uses: softprops/action-gh-release@a74c6b72af54cfa997e81df42d94703d6313a2d0 # v0.1.15
+        uses: softprops/action-gh-release@fb2d03176f42a1f0dd433ca263f314051d3edd44 # v0.1.15
         if: needs.release.outputs.release
         with:
           files: |
