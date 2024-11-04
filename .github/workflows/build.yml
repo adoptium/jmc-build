@@ -87,10 +87,28 @@ jobs:
           distribution: temurin
           cache: 'maven'
           mvn-toolchain-id: 'JavaSE-17'
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4.5.0
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: 'maven'
+          mvn-toolchain-id: 'JavaSE-21'
+      
+      # Manually install Maven 3.9.9 because ubuntu-latest image uses Maven 3.8.8 by default
+      # https://github.com/actions/setup-java/issues/685#issuecomment-2354724977
+      - name: Install latest Maven
+        run: |
+          MAVEN_VERSION=3.9.9
+          wget https://downloads.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz
+          tar xzvf apache-maven-$MAVEN_VERSION-bin.tar.gz
+          sudo mv apache-maven-$MAVEN_VERSION /opt/maven
+          sudo rm -f /usr/bin/mvn  # Remove existing symbolic link if it exists
+          sudo ln -s /opt/maven/bin/mvn /usr/bin/mvn  # Create new symbolic link
 
       - name: Build & test core libraries
         run: |
-          mvn verify
           mvn install
         working-directory: core
 
@@ -118,19 +136,14 @@ jobs:
           PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
         working-directory: agent
 
-      - name: Build
+      - name: Build & test
         run: |
           mvn clean
           mvn p2:site
           mvn jetty:run &
           cd ../../
-          mvn package
+          mvn verify
         working-directory: releng/third-party
-
-      - name: Run Unit Tests
-        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
-        with:
-          run: mvn verify
 
       - name: Run UI Tests
         # Ignore UI failures for now
