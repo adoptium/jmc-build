@@ -1,5 +1,5 @@
 def overridesUrl = 'https://github.com/adoptium/jmc-build.git'
-def overridesBranch = 'master'
+def overridesBranch = 'main'
 def jmcBranch = 'master'
 def jmcVersion = '9.1.0-SNAPSHOT'
 
