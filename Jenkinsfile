@@ -1,7 +1,7 @@
 def overridesUrl = 'https://github.com/adoptium/jmc-build.git'
 def overridesBranch = 'master'
 def jmcBranch = 'master'
-def jmcVersion = '9.0.0-SNAPSHOT'
+def jmcVersion = '9.1.0-SNAPSHOT'
 
 pipeline {
     agent {
@@ -10,8 +10,8 @@ pipeline {
         }
     }
     tools {
-        maven 'apache-maven-3.8.6'
-        jdk 'temurin-jdk17-latest'
+        maven 'apache-maven-3.9.9'
+        jdk 'temurin-jdk21-latest'
     }
 
     options {
