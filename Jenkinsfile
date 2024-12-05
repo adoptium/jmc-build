@@ -104,17 +104,33 @@ pipeline {
         }
         // send a mail on unsuccessful and fixed builds
         unsuccessful { // means unstable || failure || aborted
+        // Email notification
             emailext subject: 'Build $BUILD_STATUS $PROJECT_NAME #$BUILD_NUMBER!',
             body: '''Check console output at $BUILD_URL to view the results.''',
             recipientProviders: [culprits(), requestor()]
             //to: 'other.recipient@domain.org'
             archiveArtifacts allowEmptyArchive: true, artifacts: '**/target/surefire-reports/TEST-*.xml', followSymlinks: false
+
+            // Slack notification
+            slackSend(
+                channel: '#build-failures',
+                color: 'danger',
+                message: "Build *FAILED* for `${env.JOB_NAME}` - Build #${env.BUILD_NUMBER}\nSee details: ${env.BUILD_URL}"
+            )
         }
         fixed { // back to normal
+            // Email notification
             emailext subject: 'Build $BUILD_STATUS $PROJECT_NAME #$BUILD_NUMBER!',
             body: '''Check console output at $BUILD_URL to view the results.''',
             recipientProviders: [culprits(), requestor()]
             //to: 'other.recipient@domain.org'
+
+            // Slack notification
+            slackSend(
+                channel: '#build-failures',
+                color: 'good',
+                message: "Build *FIXED* for `${env.JOB_NAME}` - Build #${env.BUILD_NUMBER}\nSee details: ${env.BUILD_URL}"
+            )
         }
     }
 }
