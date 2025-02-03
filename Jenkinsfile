@@ -5,6 +5,7 @@ def jmcVersion = '9.1.0-SNAPSHOT'
 
 pipeline {
     agent {
+        // The ubuntu pod template allows UI tests.
         kubernetes {
             inheritFrom 'ubuntu-2404'
         }
@@ -78,9 +79,7 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     timeout(180) {
-                        xvnc {
-                            sh 'mvn verify -fae -P uitests'
-                        }
+                        sh 'mvn verify -fae -P uitests'
                     }
                 }
             }
@@ -91,13 +90,6 @@ pipeline {
     post {
         always {
             junit '**/target/surefire-reports/TEST-*.xml'
-            dir('target/products') {
-              sh "mv -f org.openjdk.jmc-linux.gtk.aarch64.tar.gz    org.openjdk.jmc-${jmcVersion}-linux.gtk.aarch64.tar.gz"
-              sh "mv -f org.openjdk.jmc-linux.gtk.x86_64.tar.gz     org.openjdk.jmc-${jmcVersion}-linux.gtk.x86_64.tar.gz"
-              sh "mv -f org.openjdk.jmc-macosx.cocoa.aarch64.tar.gz org.openjdk.jmc-${jmcVersion}-macosx.cocoa.aarch64.tar.gz"
-              sh "mv -f org.openjdk.jmc-macosx.cocoa.x86_64.tar.gz  org.openjdk.jmc-${jmcVersion}-macosx.cocoa.x86_64.tar.gz"
-              sh "mv -f org.openjdk.jmc-win32.win32.x86_64.zip      org.openjdk.jmc-${jmcVersion}-win32.win32.x86_64.zip"
-            }
             archiveArtifacts artifacts: 'agent/target/agent-*', fingerprint: true
             archiveArtifacts artifacts: 'application/org.openjdk.jmc.updatesite.ide/target/*.zip', fingerprint: true
             archiveArtifacts artifacts: 'target/products/org.openjdk.jmc-*', fingerprint: true
