@@ -6,7 +6,7 @@ def jmcVersion = '9.1.0-SNAPSHOT'
 pipeline {
     agent {
         kubernetes {
-            inheritFrom 'centos-8'
+            inheritFrom 'ubuntu-2404'
         }
     }
     tools {
