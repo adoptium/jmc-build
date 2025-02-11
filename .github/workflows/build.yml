@@ -52,7 +52,7 @@ jobs:
       MAVEN_OPTS: -Xmx2048m -Declipse.p2.mirrors=false
     steps:
       - name: Checkout JMC
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4.2.2
         with:
           repository: openjdk/jmc
           ref: ${{ needs.release.outputs.checkoutRef }}
@@ -61,7 +61,7 @@ jobs:
         run: git rev-parse HEAD > release-${{ needs.release.outputs.version }}.txt
 
       - name: Checkout JMC Overrides
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v4.2.2
         with:
           path: workspace
 
@@ -81,7 +81,7 @@ jobs:
           echo "MAVEN_OPTS=$MAVEN_OPTS -DskipNexusStagingDeployMojo=true -Dchangelist=" >> $GITHUB_ENV
 
       - name: Set up JDK 17
-        uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4.6.0
+        uses: actions/setup-java@v4.7.0
         with:
           java-version: 17
           distribution: temurin
@@ -89,7 +89,7 @@ jobs:
           mvn-toolchain-id: 'JavaSE-17'
       
       - name: Set up JDK 21
-        uses: actions/setup-java@7a6d8a8234af8eb26422e24e3006232cccaa061b # v4.6.0
+        uses: actions/setup-java@v4.7.0
         with:
           java-version: 21
           distribution: temurin
@@ -148,7 +148,7 @@ jobs:
       - name: Run UI Tests
         # Ignore UI failures for now
         continue-on-error: true
-        uses: coactions/setup-xvfb@b6b4fcfb9f5a895edadc3bc76318fae0ac17c8b3 # v1.0.1
+        uses: coactions/setup-xvfb@v1.0.1
         with:
           run: mvn verify -P uitests
 
@@ -178,7 +178,7 @@ jobs:
           fail-if-no-release: false
 
       - name: Deploy release assets
-        uses: softprops/action-gh-release@7b4da11513bf3f43f9999e90eabced41ab8bb048 # v0.1.15
+        uses: softprops/action-gh-release@v2.2.1
         if: needs.release.outputs.release
         with:
           files: |
