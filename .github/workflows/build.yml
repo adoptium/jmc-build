@@ -48,9 +48,12 @@ jobs:
     needs: release
     name: Build
     runs-on: ubuntu-latest
-    env:
-      MAVEN_OPTS: -Xmx2048m -Declipse.p2.mirrors=false
     steps:
+      - name: Setting maven options
+        run: |
+          echo "MAVEN_OPTS=-Xmx2048m -Declipse.p2.mirrors=false" >> $GITHUB_ENV
+          echo "MAVEN_ARGS=" >> $GITHUB_ENV
+
       - name: Checkout JMC
         uses: actions/checkout@v4.2.2
         with:
@@ -78,7 +81,7 @@ jobs:
         run: |
           find . ! -path "*/.git/**" -type f -name "pom.xml" -exec sed -i s/"${{ needs.release.outputs.version }}-SNAPSHOT"/"${{ needs.release.outputs.version }}"/ {} \;
           find . ! -path "*/.git/**" -type f \( -name "feature.xml" -o -name "MANIFEST.MF" \) -exec sed -i s/"${{ needs.release.outputs.version }}.qualifier"/"${{ needs.release.outputs.version }}"/ {} \;
-          echo "MAVEN_OPTS=$MAVEN_OPTS -DskipNexusStagingDeployMojo=true -Dchangelist=" >> $GITHUB_ENV
+          echo "MAVEN_ARGS=$MAVEN_ARGS -DskipNexusStagingDeployMojo=true -Dchangelist=" >> $GITHUB_ENV
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4.7.0
@@ -109,13 +112,13 @@ jobs:
 
       - name: Build & test core libraries
         run: |
-          mvn install
+          mvn install $MAVEN_ARGS
         working-directory: core
 
       - name: Deploy core libraries
         if: needs.release.outputs.release
         run: |
-          mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptium.jfrog.io/artifactory/jmc-libs -Dsnapshot.repo=https://adoptium.jfrog.io/artifactory/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
+          mvn deploy $MAVEN_ARGS --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptium.jfrog.io/artifactory/jmc-libs -Dsnapshot.repo=https://adoptium.jfrog.io/artifactory/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
         env:
           USERNAME: ${{ secrets.ARTIFACTORY_USER }}
           PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
@@ -123,14 +126,14 @@ jobs:
 
       - name: Build & test agent
         run: |
-          mvn verify
-          mvn install
+          mvn verify $MAVEN_ARGS
+          mvn install $MAVEN_ARGS
         working-directory: agent
 
       - name: Deploy agent libraries
         if: needs.release.outputs.release
         run: |
-          mvn deploy --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptium.jfrog.io/artifactory/jmc-libs -Dsnapshot.repo=https://adoptium.jfrog.io/artifactory/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
+          mvn deploy $MAVEN_ARGS --settings $GITHUB_WORKSPACE/.m2/settings.xml -Dpublish.user=$USERNAME -Dpublish.password=$PASSWORD -Drelease.repo=https://adoptium.jfrog.io/artifactory/jmc-libs -Dsnapshot.repo=https://adoptium.jfrog.io/artifactory/jmc-libs-snapshots -Dgpg.skip=true -DskipTests=true
         env:
           USERNAME: ${{ secrets.ARTIFACTORY_USER }}
           PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
@@ -142,7 +145,7 @@ jobs:
           mvn p2:site
           mvn jetty:run &
           cd ../../
-          mvn verify
+          mvn verify $MAVEN_ARGS
         working-directory: releng/third-party
 
       - name: Run UI Tests
@@ -150,7 +153,7 @@ jobs:
         continue-on-error: true
         uses: coactions/setup-xvfb@v1.0.1
         with:
-          run: mvn verify -P uitests
+          run: mvn verify -P uitests $MAVEN_ARGS
 
       - name: Deploy update sites
         if: needs.release.outputs.release
