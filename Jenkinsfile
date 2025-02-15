@@ -79,7 +79,9 @@ pipeline {
             steps {
                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                     timeout(180) {
-                        sh 'mvn verify -fae -P uitests'
+                        xvnc {
+                            sh 'mvn verify -fae -P uitests'
+                        }
                     }
                 }
             }
