@@ -96,11 +96,11 @@ jobs:
           cache: 'maven'
           mvn-toolchain-id: 'JavaSE-21'
       
-      # Manually install Maven 3.9.9 because ubuntu-latest image uses Maven 3.8.8 by default
+      # Manually install Maven
       # https://github.com/actions/setup-java/issues/685#issuecomment-2354724977
       - name: Install latest Maven
         run: |
-          MAVEN_VERSION=3.9.9
+          MAVEN_VERSION=3.9.10
           wget https://downloads.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz
           tar xzvf apache-maven-$MAVEN_VERSION-bin.tar.gz
           sudo mv apache-maven-$MAVEN_VERSION /opt/maven
