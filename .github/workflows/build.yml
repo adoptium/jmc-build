@@ -100,8 +100,8 @@ jobs:
       # https://github.com/actions/setup-java/issues/685#issuecomment-2354724977
       - name: Install latest Maven
         run: |
-          MAVEN_VERSION=3.9.10
-          wget https://downloads.apache.org/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz
+          MAVEN_VERSION=3.9.11
+          wget https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/$MAVEN_VERSION/apache-maven-$MAVEN_VERSION-bin.tar.gz
           tar xzvf apache-maven-$MAVEN_VERSION-bin.tar.gz
           sudo mv apache-maven-$MAVEN_VERSION /opt/maven
           sudo rm -f /usr/bin/mvn  # Remove existing symbolic link if it exists
