@@ -152,6 +152,16 @@ jobs:
         with:
           run: mvn verify -P uitests
 
+      # Show test results in GitHub Actions
+      - name: Publish Test Report
+        uses: dorny/test-reporter@v1
+        if: always() # Always runs even if the job fails
+        with:
+          name: Unit Tests
+          path: target/surefire-reports/*.xml # Path to Surefire or TestNG reports
+          reporter: junit # Supported format
+          fail-on-error: false # Prevents this step from failing when reports show failed tests
+
       - name: Deploy update sites
         if: needs.release.outputs.release
         run: |
