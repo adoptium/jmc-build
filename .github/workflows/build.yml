@@ -27,6 +27,8 @@ on:
           default: '1.0.1-SNAPSHOT'
 
 permissions:
+  actions: read
+  checks: write
   contents: write
 
 jobs:
@@ -52,7 +54,7 @@ jobs:
       MAVEN_OPTS: -Xmx2048m -Declipse.p2.mirrors=false
     steps:
       - name: Checkout JMC
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
         with:
           repository: openjdk/jmc
           ref: ${{ needs.release.outputs.checkoutRef }}
@@ -61,7 +63,7 @@ jobs:
         run: git rev-parse HEAD > release-${{ needs.release.outputs.version }}.txt
 
       - name: Checkout JMC Overrides
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.2
         with:
           path: workspace
 
@@ -81,21 +83,21 @@ jobs:
           echo "MAVEN_OPTS=$MAVEN_OPTS -DskipNexusStagingDeployMojo=true -Dchangelist=" >> $GITHUB_ENV
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4.7.0
+        uses: actions/setup-java@v5.2.0
         with:
           java-version: 17
           distribution: temurin
           cache: 'maven'
           mvn-toolchain-id: 'JavaSE-17'
-      
+
       - name: Set up JDK 21
-        uses: actions/setup-java@v4.7.0
+        uses: actions/setup-java@v5.2.0
         with:
           java-version: 21
           distribution: temurin
           cache: 'maven'
           mvn-toolchain-id: 'JavaSE-21'
-      
+
       # Manually install Maven
       # https://github.com/actions/setup-java/issues/685#issuecomment-2354724977
       - name: Install latest Maven
@@ -154,13 +156,15 @@ jobs:
 
       # Show test results in GitHub Actions
       - name: Publish Test Report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v3.0.0
         if: always() # Always runs even if the job fails
         with:
           name: Unit Tests
-          path: target/surefire-reports/*.xml # Path to Surefire or TestNG reports
-          reporter: junit # Supported format
+          path: '**/target/surefire-reports/*.xml'
+          reporter: java-junit
           fail-on-error: false # Prevents this step from failing when reports show failed tests
+          list-suites: failed
+          list-tests: failed
 
       - name: Deploy update sites
         if: needs.release.outputs.release
@@ -188,7 +192,7 @@ jobs:
           fail-if-no-release: false
 
       - name: Deploy release assets
-        uses: softprops/action-gh-release@v2.2.1
+        uses: softprops/action-gh-release@v2.6.1
         if: needs.release.outputs.release
         with:
           files: |
