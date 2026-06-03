@@ -54,7 +54,7 @@ jobs:
       MAVEN_OPTS: -Xmx2048m -Declipse.p2.mirrors=false
     steps:
       - name: Checkout JMC
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
         with:
           repository: openjdk/jmc
           ref: ${{ needs.release.outputs.checkoutRef }}
@@ -63,7 +63,7 @@ jobs:
         run: git rev-parse HEAD > release-${{ needs.release.outputs.version }}.txt
 
       - name: Checkout JMC Overrides
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6.0.3
         with:
           path: workspace
 
