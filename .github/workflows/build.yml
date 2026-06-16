@@ -83,7 +83,7 @@ jobs:
           echo "MAVEN_OPTS=$MAVEN_OPTS -DskipNexusStagingDeployMojo=true -Dchangelist=" >> $GITHUB_ENV
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v5.2.0
+        uses: actions/setup-java@v5.3.0
         with:
           java-version: 17
           distribution: temurin
@@ -91,7 +91,7 @@ jobs:
           mvn-toolchain-id: 'JavaSE-17'
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v5.2.0
+        uses: actions/setup-java@v5.3.0
         with:
           java-version: 21
           distribution: temurin
