@@ -156,7 +156,7 @@ jobs:
 
       # Show test results in GitHub Actions
       - name: Publish Test Report
-        uses: dorny/test-reporter@v3.0.0
+        uses: dorny/test-reporter@v3.2.0
         if: always() # Always runs even if the job fails
         with:
           name: Unit Tests
